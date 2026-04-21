@@ -26,14 +26,12 @@ class GameNavigator {
         this.siteCards = [];
         this.activeCard = null;
         this.mapElement = null;
-        this.infoPanel = null;
         
         this.init();
     }
 
     init() {
         this.mapElement = document.getElementById('gameMap');
-        this.infoPanel = document.getElementById('infoPanel');
         this.player.element = document.getElementById('player');
         
         // 初始化网站卡片
@@ -199,17 +197,6 @@ class GameNavigator {
         if (hitCardFromBelow) {
             this.hitCardFromBelow(hitCardFromBelow.data, hitCardFromBelow.element);
         }
-
-        // 显示信息面板
-        if (foundCard) {
-            if (this.activeCard !== foundCard.data) {
-                this.activeCard = foundCard.data;
-                this.showInfo(foundCard.data);
-            }
-        } else {
-            this.activeCard = null;
-            this.hideInfo();
-        }
     }
 
     hitCardFromBelow(site, cardElement) {
@@ -275,17 +262,6 @@ class GameNavigator {
             rect1.y + padding > rect2.y + rect2.height ||
             rect1.y + rect1.height - padding < rect2.y
         );
-    }
-
-    showInfo(site) {
-        document.getElementById('siteName').textContent = site.name;
-        document.getElementById('siteDescription').textContent = site.description;
-        document.getElementById('siteLink').href = site.url;
-        this.infoPanel.classList.add('visible');
-    }
-
-    hideInfo() {
-        this.infoPanel.classList.remove('visible');
     }
 
     gameLoop() {
