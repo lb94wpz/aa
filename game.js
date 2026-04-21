@@ -163,8 +163,8 @@ class GameNavigator {
             height: PLAYER_SIZE
         };
 
-        let foundCard = null;
         let hitCardFromBelow = null;
+        let sideCollision = false;
 
         this.siteCards.forEach(card => {
             const cardRect = {
@@ -174,23 +174,48 @@ class GameNavigator {
                 height: card.height
             };
 
-            // 检测碰撞（扩大碰撞范围）
-            if (this.isColliding(playerRect, cardRect, 20)) {
-                foundCard = card;
+            // 检测基础碰撞（缩小范围以便更精确检测）
+            if (this.isColliding(playerRect, cardRect, 10)) {
                 card.element.classList.add('active');
                 
                 // 检测是否从下方跳跃碰撞（玩家向上跳时撞到卡片底部）
                 if (this.player.jumping && this.player.velocityY < 0) {
-                    // 玩家顶部进入卡片底部区域（从下方撞上来）
-                    // 上一帧玩家在卡片下方，这一帧玩家顶部进入卡片
                     const playerTop = playerRect.y;
                     const cardBottom = cardRect.y + cardRect.height;
                     const cardTop = cardRect.y;
                     
                     // 玩家顶部在卡片底部之上，但在卡片顶部之下，说明是从下方撞上来的
-                    if (playerTop < cardBottom && playerTop > cardTop - 20) {
+                    if (playerTop < cardBottom && playerTop > cardTop - 15) {
                         hitCardFromBelow = card;
+                        return;
                     }
+                }
+                
+                // 如果不是从下方碰撞，则为侧边碰撞，需要阻挡玩家
+                // 计算碰撞重叠区域
+                const overlapLeft = (playerRect.x + playerRect.width) - cardRect.x;
+                const overlapRight = (cardRect.x + cardRect.width) - playerRect.x;
+                const overlapTop = (playerRect.y + playerRect.height) - cardRect.y;
+                const overlapBottom = (cardRect.y + cardRect.height) - playerRect.y;
+                
+                // 找出最小重叠方向
+                const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+                
+                // 如果是侧边碰撞（水平重叠最小）
+                if (minOverlap === overlapLeft || minOverlap === overlapRight) {
+                    sideCollision = true;
+                    
+                    // 从左边碰撞：将玩家推出到卡片左侧
+                    if (overlapLeft < overlapRight) {
+                        this.player.x = cardRect.x - playerRect.width - 1;
+                    }
+                    // 从右边碰撞：将玩家推出到卡片右侧
+                    else {
+                        this.player.x = cardRect.x + cardRect.width + 1;
+                    }
+                    
+                    // 停止水平移动
+                    this.player.velocityX = 0;
                 }
             } else {
                 card.element.classList.remove('active');
