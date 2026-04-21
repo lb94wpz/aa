@@ -424,6 +424,144 @@ body {
     }
 }
 
+/* ========== 对话框样式 ========== */
+.site-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.site-dialog.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.dialog-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.dialog-content {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 4px solid var(--accent-color);
+    border-radius: 16px;
+    padding: 30px 40px;
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+}
+
+.site-dialog.visible .dialog-content {
+    transform: scale(1);
+}
+
+.dialog-content h2 {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    margin-bottom: 20px;
+    text-shadow: 3px 3px 0px #0f3460;
+}
+
+.dialog-url {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.dialog-url span {
+    font-size: 0.7rem;
+    color: #888;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.dialog-url p {
+    font-size: 0.8rem;
+    color: #4facfe;
+    word-break: break-all;
+    font-family: 'Courier New', monospace;
+}
+
+.dialog-description {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #c0c0c0;
+    margin-bottom: 25px;
+}
+
+.dialog-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.dialog-btn {
+    padding: 12px 30px;
+    font-size: 0.9rem;
+    font-family: var(--pixel-font);
+    border: 3px solid;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dialog-btn-primary {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #fff;
+}
+
+.dialog-btn-primary:hover {
+    background: transparent;
+    color: var(--accent-color);
+    transform: scale(1.05);
+}
+
+.dialog-btn-secondary {
+    background: transparent;
+    border-color: #666;
+    color: #999;
+}
+
+.dialog-btn-secondary:hover {
+    border-color: #fff;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+/* ========== 方块震动动画 ========== */
+@keyframes shake {
+    0%, 100% { transform: translateX(0) translateY(0); }
+    10% { transform: translateX(-5px) translateY(-3px); }
+    20% { transform: translateX(5px) translateY(3px); }
+    30% { transform: translateX(-5px) translateY(-2px); }
+    40% { transform: translateX(5px) translateY(2px); }
+    50% { transform: translateX(-3px) translateY(-3px); }
+    60% { transform: translateX(3px) translateY(3px); }
+    70% { transform: translateX(-3px) translateY(-2px); }
+    80% { transform: translateX(3px) translateY(2px); }
+    90% { transform: translateX(-2px) translateY(-1px); }
+}
+
 /* ========== 加载动画 ========== */
 @keyframes fadeIn {
     from { opacity: 0; }

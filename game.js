@@ -162,6 +162,7 @@ class GameNavigator {
         };
 
         let foundCard = null;
+        let hitCardFromBelow = null;
 
         this.siteCards.forEach(card => {
             const cardRect = {
@@ -175,10 +176,29 @@ class GameNavigator {
             if (this.isColliding(playerRect, cardRect, 20)) {
                 foundCard = card;
                 card.element.classList.add('active');
+                
+                // 检测是否从下方跳跃碰撞（玩家向上跳时撞到卡片底部）
+                if (this.player.jumping && this.player.velocityY < 0) {
+                    // 玩家顶部进入卡片底部区域（从下方撞上来）
+                    // 上一帧玩家在卡片下方，这一帧玩家顶部进入卡片
+                    const playerTop = playerRect.y;
+                    const cardBottom = cardRect.y + cardRect.height;
+                    const cardTop = cardRect.y;
+                    
+                    // 玩家顶部在卡片底部之上，但在卡片顶部之下，说明是从下方撞上来的
+                    if (playerTop < cardBottom && playerTop > cardTop - 20) {
+                        hitCardFromBelow = card;
+                    }
+                }
             } else {
                 card.element.classList.remove('active');
             }
         });
+
+        // 处理从下方撞击卡片
+        if (hitCardFromBelow) {
+            this.hitCardFromBelow(hitCardFromBelow.data, hitCardFromBelow.element);
+        }
 
         // 显示信息面板
         if (foundCard) {
@@ -190,6 +210,62 @@ class GameNavigator {
             this.activeCard = null;
             this.hideInfo();
         }
+    }
+
+    hitCardFromBelow(site, cardElement) {
+        // 给方块添加震动效果
+        this.shakeCard(cardElement);
+
+        // 立即停止向上移动，开始下落
+        this.player.velocityY = 0;
+
+        // 如果对话框已经打开，先关闭当前的，再显示新的
+        if (this.dialogOpen) {
+            this.hideDialog();
+        }
+
+        // 显示对话框
+        this.showDialog(site);
+    }
+
+    shakeCard(cardElement) {
+        cardElement.style.animation = 'none';
+        cardElement.offsetHeight; // 触发重排
+        cardElement.style.animation = 'shake 0.5s ease-in-out';
+        
+        // 动画结束后清除
+        setTimeout(() => {
+            cardElement.style.animation = '';
+        }, 500);
+    }
+
+    showDialog(site) {
+        this.dialogOpen = true;
+        const dialog = document.getElementById('siteDialog');
+        document.getElementById('dialogSiteName').textContent = site.name;
+        document.getElementById('dialogSiteUrl').textContent = site.url;
+        document.getElementById('dialogSiteDescription').textContent = site.description;
+        
+        // 设置打开按钮事件
+        const openBtn = document.getElementById('dialogOpenBtn');
+        openBtn.onclick = () => {
+            window.open(site.url, '_blank');
+            this.hideDialog();
+        };
+        
+        // 设置取消按钮事件
+        const cancelBtn = document.getElementById('dialogCancelBtn');
+        cancelBtn.onclick = () => {
+            this.hideDialog();
+        };
+        
+        dialog.classList.add('visible');
+    }
+
+    hideDialog() {
+        this.dialogOpen = false;
+        const dialog = document.getElementById('siteDialog');
+        dialog.classList.remove('visible');
     }
 
     isColliding(rect1, rect2, padding = 0) {
