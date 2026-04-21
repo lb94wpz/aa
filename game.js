@@ -11,6 +11,8 @@ class GameNavigator {
             deceleration: 0.5,
             velocityX: 0,
             jumping: false,
+            jumpCount: 0,
+            maxJumpCount: 2,
             jumpForce: 12,
             gravity: 0.6,
             velocityY: 0,
@@ -20,6 +22,7 @@ class GameNavigator {
         };
         
         this.keys = {};
+        this.jumpKeyHeld = false;
         this.siteCards = [];
         this.activeCard = null;
         this.mapElement = null;
@@ -238,22 +241,27 @@ class GameNavigator {
         }
 
         // 跳跃（空格键或上方向键）- 速度越快跳跃高度越高
-        if ((this.keys[' '] || this.keys['arrowup']) && !this.player.jumping) {
+        // 支持二段跳：最多可跳2次，落地后重置
+        const jumpKeyPressed = this.keys[' '] || this.keys['arrowup'];
+        if (jumpKeyPressed && !this.jumpKeyHeld && this.player.jumpCount < this.player.maxJumpCount) {
             this.player.jumping = true;
+            this.player.jumpCount++;
             // 基础跳跃力 + 速度加成（速度越快跳得越高）
             const speedBonus = Math.abs(this.player.velocityX) * 0.3;
             this.player.velocityY = -(this.player.jumpForce + speedBonus);
         }
+        this.jumpKeyHeld = jumpKeyPressed;
 
         // 应用重力
         if (this.player.jumping) {
             this.player.velocityY += this.player.gravity;
             this.player.y += this.player.velocityY;
-            
+
             // 检测是否落地
             if (this.player.y >= this.player.groundY) {
                 this.player.y = this.player.groundY;
                 this.player.jumping = false;
+                this.player.jumpCount = 0;
                 this.player.velocityY = 0;
             }
         }
