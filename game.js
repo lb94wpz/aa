@@ -166,6 +166,7 @@ class GameNavigator {
         let hitCardFromBelow = null;
         let hasAnyCollision = false;
         let collidedCards = [];
+        let onPlatform = false;
 
         this.siteCards.forEach(card => {
             const cardRect = {
@@ -204,6 +205,7 @@ class GameNavigator {
                     this.player.velocityY = 0;
                     this.player.jumping = false;
                     this.player.jumpCount = 0;
+                    onPlatform = true;
                 }
                 // 侧边碰撞
                 else if (minOverlap === overlapLeft || minOverlap === overlapRight) {
@@ -222,6 +224,9 @@ class GameNavigator {
                 card.element.classList.remove('active');
             }
         });
+
+        // 更新 onPlatform 状态
+        this.player.onPlatform = onPlatform;
 
         // 任何接触都触发震动
         if (hasAnyCollision && collidedCards.length > 0) {
@@ -341,7 +346,7 @@ class GameNavigator {
         this.jumpKeyHeld = jumpKeyPressed;
 
         // 应用重力
-        if (this.player.jumping) {
+        if (this.player.jumping || !this.player.onPlatform) {
             this.player.velocityY += this.player.gravity;
             this.player.y += this.player.velocityY;
 
