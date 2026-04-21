@@ -3,6 +3,8 @@ const PLAYER_SIZE = 64;
 
 class GameNavigator {
     constructor() {
+        document.documentElement.style.setProperty('--player-size', PLAYER_SIZE + 'px');
+        
         this.player = {
             x: 400,
             y: 0,
