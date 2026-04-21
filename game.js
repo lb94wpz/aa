@@ -1,4 +1,6 @@
 // ========== 游戏引擎 ==========
+const PLAYER_SIZE = 64;
+
 class GameNavigator {
     constructor() {
         this.player = {
@@ -45,7 +47,7 @@ class GameNavigator {
         
         // 设置玩家初始位置为底部
         const mapRect = this.mapElement.getBoundingClientRect();
-        this.player.groundY = mapRect.height - 48;
+        this.player.groundY = mapRect.height - PLAYER_SIZE;
         this.player.y = this.player.groundY;
         
         // 启动游戏循环
@@ -117,8 +119,8 @@ class GameNavigator {
     handleResize() {
         // 确保玩家在地图范围内
         const mapRect = this.mapElement.getBoundingClientRect();
-        this.player.x = Math.min(Math.max(this.player.x, 0), mapRect.width - 48);
-        this.player.groundY = Math.min(this.player.groundY, mapRect.height - 48);
+        this.player.x = Math.min(Math.max(this.player.x, 0), mapRect.width - PLAYER_SIZE);
+        this.player.groundY = Math.min(this.player.groundY, mapRect.height - PLAYER_SIZE);
         
         this.updatePlayerPosition();
     }
@@ -155,8 +157,8 @@ class GameNavigator {
         const playerRect = {
             x: this.player.x,
             y: this.player.y,
-            width: 48,
-            height: 48
+            width: PLAYER_SIZE,
+            height: PLAYER_SIZE
         };
 
         let foundCard = null;
@@ -266,7 +268,7 @@ class GameNavigator {
 
     gameLoop() {
         const mapRect = this.mapElement.getBoundingClientRect();
-        const maxX = mapRect.width - 48;
+        const maxX = mapRect.width - PLAYER_SIZE;
 
         // 左右移动（去掉上下移动）
         if (this.keys['arrowleft']) {

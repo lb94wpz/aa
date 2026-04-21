@@ -109,16 +109,16 @@ body {
 /* ========== 玩家角色 ========== */
 .player {
     position: absolute;
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
     transition: all 0.15s ease-out;
     z-index: 100;
 }
 
 .player-sprite {
-    font-size: 32px;
+    font-size: 42px;
     text-align: center;
-    line-height: 48px;
+    line-height: 64px;
     animation: bounce 0.6s infinite;
     filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.5));
 }
@@ -126,9 +126,9 @@ body {
 /* 马里奥角色样式 */
 .mario {
     position: relative;
-    width: 32px;
-    height: 40px;
-    margin: 4px auto;
+    width: 42px;
+    height: 53px;
+    margin: 5px auto;
 }
 
 .mario-hat {
@@ -136,10 +136,10 @@ body {
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 28px;
-    height: 10px;
+    width: 37px;
+    height: 13px;
     background: #e70000;
-    border-radius: 4px 4px 0 0;
+    border-radius: 5px 5px 0 0;
     box-shadow: 0 2px 0 #8b0000;
 }
 
@@ -148,31 +148,31 @@ body {
     position: absolute;
     bottom: -2px;
     left: -2px;
-    width: 32px;
-    height: 4px;
+    width: 42px;
+    height: 5px;
     background: #e70000;
-    border-radius: 2px;
+    border-radius: 3px;
 }
 
 .mario-face {
     position: absolute;
-    top: 10px;
+    top: 13px;
     left: 50%;
     transform: translateX(-50%);
-    width: 24px;
-    height: 14px;
+    width: 32px;
+    height: 18px;
     background: #ffcc99;
-    border-radius: 4px;
+    border-radius: 5px;
     box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
 }
 
 .mario-face::before {
     content: '';
     position: absolute;
-    top: 4px;
-    right: 2px;
-    width: 8px;
-    height: 4px;
+    top: 5px;
+    right: 3px;
+    width: 10px;
+    height: 5px;
     background: #4a3000;
     border-radius: 2px;
 }
@@ -180,10 +180,10 @@ body {
 .mario-face::after {
     content: '';
     position: absolute;
-    top: 8px;
+    top: 11px;
     right: 0;
-    width: 12px;
-    height: 4px;
+    width: 16px;
+    height: 5px;
     background: #4a3000;
     border-radius: 2px;
 }
@@ -193,36 +193,36 @@ body {
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 26px;
-    height: 18px;
+    width: 34px;
+    height: 24px;
     background: #e70000;
-    border-radius: 4px 4px 0 0;
+    border-radius: 5px 5px 0 0;
     overflow: hidden;
 }
 
 .mario-body::before {
     content: '';
     position: absolute;
-    top: 6px;
-    left: 2px;
-    width: 8px;
-    height: 10px;
+    top: 8px;
+    left: 3px;
+    width: 10px;
+    height: 13px;
     background: #0066cc;
     border-radius: 2px;
-    box-shadow: 14px 0 0 #0066cc;
+    box-shadow: 18px 0 0 #0066cc;
 }
 
 .mario-body::after {
     content: '';
     position: absolute;
-    top: 4px;
+    top: 5px;
     left: 50%;
     transform: translateX(-50%);
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     background: #ffcc00;
     border-radius: 50%;
-    box-shadow: 0 8px 0 #ffcc00;
+    box-shadow: 0 10px 0 #ffcc00;
 }
 
 @keyframes bounce {
@@ -321,13 +321,19 @@ body {
     }
     
     .player {
-        width: 36px;
-        height: 36px;
+        width: 48px;
+        height: 48px;
     }
     
     .player-sprite {
-        font-size: 24px;
-        line-height: 36px;
+        font-size: 32px;
+        line-height: 48px;
+    }
+    
+    .mario {
+        width: 32px;
+        height: 40px;
+        margin: 4px auto;
     }
     
     .site-card {
