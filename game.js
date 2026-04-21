@@ -15,7 +15,8 @@ class GameNavigator {
             gravity: 0.6,
             velocityY: 0,
             groundY: 0,
-            element: null
+            element: null,
+            direction: 1 // 1 表示向右，-1 表示向左
         };
         
         this.keys = {};
@@ -125,30 +126,27 @@ class GameNavigator {
         this.player.element.style.left = this.player.x + 'px';
         this.player.element.style.top = this.player.y + 'px';
         
-        // 向左移动时翻转人物
-        if (this.player.velocityX < -0.5) {
-            this.player.element.style.transform = 'scaleX(-1)';
-        } else if (this.player.velocityX > 0.5) {
-            this.player.element.style.transform = 'scaleX(1)';
+        // 跳跃时：保持跳跃前的方向，不旋转
+        if (this.player.jumping) {
+            this.player.element.style.transform = `scaleX(${this.player.direction})`;
+            return;
         }
         
         // 根据移动速度添加倾斜效果（向右时）
-        if (this.player.velocityX > 0.5 && !this.player.jumping) {
+        if (this.player.velocityX > 0.5) {
+            this.player.direction = 1;
             const tilt = Math.min(this.player.velocityX * 2, 15);
             this.player.element.style.transform = `scaleX(1) rotate(${tilt}deg)`;
         }
-        
         // 向左移动时的倾斜效果
-        if (this.player.velocityX < -0.5 && !this.player.jumping) {
+        else if (this.player.velocityX < -0.5) {
+            this.player.direction = -1;
             const tilt = Math.min(Math.abs(this.player.velocityX) * 2, 15);
-            this.player.element.style.transform = `scaleX(-1) rotate(-${tilt}deg)`;
+            this.player.element.style.transform = `scaleX(-1) rotate(${tilt}deg)`;
         }
-        
-        // 跳跃时添加旋转效果
-        if (this.player.jumping) {
-            // 保持面向方向的同时旋转
-            const direction = this.player.velocityX < 0 ? -1 : 1;
-            this.player.element.style.transform = `scaleX(${direction}) rotate(360deg)`;
+        // 速度很小时，保持最后的方向
+        else {
+            this.player.element.style.transform = `scaleX(${this.player.direction})`;
         }
     }
 
