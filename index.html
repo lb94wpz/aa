@@ -12,11 +12,10 @@
     <div class="game-container">
         <header class="game-header">
             <h1 class="pixel-title">🎮 游戏导航站</h1>
-            <div class="instructions">
-                <span>使用 ←→ 方向键左右移动（连续按键加速）</span>
-                <span class="blink">空格键或↑跳跃 | 靠近网站卡片访问</span>
-            </div>
         </header>
+        
+        <!-- 帮助按钮 - 右上角书本图标 -->
+        <button class="help-btn" id="helpBtn" title="操作指南">📖</button>
 
         <div class="game-map" id="gameMap">
             <!-- 玩家角色 -->
@@ -53,6 +52,37 @@
                 <div class="dialog-buttons">
                     <button id="dialogOpenBtn" class="dialog-btn dialog-btn-primary">打开网站</button>
                     <button id="dialogCancelBtn" class="dialog-btn dialog-btn-secondary">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 帮助对话框 -->
+        <div class="help-dialog" id="helpDialog">
+            <div class="dialog-overlay"></div>
+            <div class="help-content">
+                <button class="help-close" id="helpClose">✕</button>
+                <h2>🎮 操作指南</h2>
+                <div class="help-list">
+                    <div class="help-item">
+                        <span class="help-key">← →</span>
+                        <span class="help-desc">左右移动（连续按键加速）</span>
+                    </div>
+                    <div class="help-item">
+                        <span class="help-key">空格 / ↑</span>
+                        <span class="help-desc">跳跃（支持二段跳）</span>
+                    </div>
+                    <div class="help-item">
+                        <span class="help-key">ESC</span>
+                        <span class="help-desc">关闭对话框</span>
+                    </div>
+                    <div class="help-item">
+                        <span class="help-key">🔴</span>
+                        <span class="help-desc">顶变大蘑菇角色变大</span>
+                    </div>
+                    <div class="help-item">
+                        <span class="help-key">🔵</span>
+                        <span class="help-desc">顶变小蘑菇角色变小</span>
+                    </div>
                 </div>
             </div>
         </div>

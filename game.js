@@ -45,6 +45,16 @@ class GameNavigator {
         this.bubbleElement = document.getElementById('playerBubble');
         this.bubbleContent = document.getElementById('bubbleContent');
         this.bubbleTimer = null;
+        this.helpDialogOpen = false;
+        
+        // 帮助按钮事件
+        this.helpBtn = document.getElementById('helpBtn');
+        this.helpDialog = document.getElementById('helpDialog');
+        this.helpCloseBtn = document.getElementById('helpClose');
+        
+        this.helpBtn.addEventListener('click', () => this.showHelpDialog());
+        this.helpCloseBtn.addEventListener('click', () => this.hideHelpDialog());
+        this.helpDialog.querySelector('.dialog-overlay').addEventListener('click', () => this.hideHelpDialog());
         
         // 初始化网站卡片
         this.createSiteCards();
@@ -126,14 +136,28 @@ class GameNavigator {
                 e.preventDefault();
             }
             // ESC 键关闭对话框
-            if (e.key === 'Escape' && this.dialogOpen) {
-                this.hideDialog();
+            if (e.key === 'Escape') {
+                if (this.helpDialogOpen) {
+                    this.hideHelpDialog();
+                } else if (this.dialogOpen) {
+                    this.hideDialog();
+                }
             }
         });
 
         document.addEventListener('keyup', (e) => {
             this.keys[e.key.toLowerCase()] = false;
         });
+    }
+    
+    showHelpDialog() {
+        this.helpDialogOpen = true;
+        this.helpDialog.classList.add('visible');
+    }
+    
+    hideHelpDialog() {
+        this.helpDialogOpen = false;
+        this.helpDialog.classList.remove('visible');
     }
 
     handleResize() {
