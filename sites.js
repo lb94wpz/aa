@@ -7,7 +7,8 @@ const sites = [
         description: "Wii 游戏在线平台，重温经典体感游戏的乐趣",
         icon: "🎮",
         color: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        position: { x: 100, y: 100 }
+        position: { x: 100, y: 100 },
+        size: { width: 120, height: 120 }
     },
     {
         id: 2,
@@ -16,7 +17,8 @@ const sites = [
         description: "GBA 游戏模拟器，掌机经典随时畅玩",
         icon: "🕹️",
         color: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-        position: { x: 300, y: 100 }
+        position: { x: 300, y: 100 },
+        size: { width: 120, height: 120 }
     },
     {
         id: 3,
@@ -25,7 +27,8 @@ const sites = [
         description: "FC/NES 红白机游戏，魂斗罗、超级玛丽等经典回忆",
         icon: "👾",
         color: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-        position: { x: 500, y: 100 }
+        position: { x: 500, y: 100 },
+        size: { width: 120, height: 120 }
     },
     {
         id: 4,
@@ -34,7 +37,8 @@ const sites = [
         description: "DOS 经典游戏模拟器，重返 80、90 年代",
         icon: "💻",
         color: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
-        position: { x: 100, y: 300 }
+        position: { x: 100, y: 300 },
+        size: { width: 120, height: 120 }
     },
     {
         id: 5,
@@ -43,7 +47,8 @@ const sites = [
         description: "ONS 模拟器，视觉小说和 AVG 游戏在线运行",
         icon: "📦",
         color: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-        position: { x: 300, y: 300 }
+        position: { x: 300, y: 300 },
+        size: { width: 120, height: 120 }
     }
 ];
 

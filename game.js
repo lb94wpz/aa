@@ -70,6 +70,11 @@ class GameNavigator {
             card.style.left = site.position.x + 'px';
             card.style.top = site.position.y + 'px';
             
+            const cardWidth = site.size ? site.size.width : 120;
+            const cardHeight = site.size ? site.size.height : 120;
+            card.style.width = cardWidth + 'px';
+            card.style.height = cardHeight + 'px';
+            
             card.innerHTML = `
                 <div class="site-icon">${site.icon}</div>
                 <div class="site-name">${site.name}</div>
@@ -98,8 +103,8 @@ class GameNavigator {
                 data: site,
                 x: site.position.x,
                 y: site.position.y,
-                width: 120,
-                height: 120
+                width: cardWidth,
+                height: cardHeight
             });
         });
     }
