@@ -53,7 +53,8 @@ class GameNavigator {
         this.bindKeys();
         
         // 更新统计
-        document.getElementById('siteCount').textContent = sites.length;
+        const websiteCount = sites.filter(s => s.category === 'website').length;
+        document.getElementById('siteCount').textContent = websiteCount;
         
         // 设置玩家初始位置为底部
         const mapRect = this.mapElement.getBoundingClientRect();
