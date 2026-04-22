@@ -75,7 +75,8 @@ const sites = [
         color: "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)",
         position: { x: 1000, y: 300 },
         size: { width: 120, height: 120 },
-        category: "grow"
+        category: "grow",
+        tip: "你是要上天吗？还想继续变大？"
     },
     {
         id: 8,
@@ -86,7 +87,8 @@ const sites = [
         color: "linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)",
         position: { x: 700, y: 300 },
         size: { width: 120, height: 120 },
-        category: "shrink"
+        category: "shrink",
+        tip: "还顶！再小你就看不到我了！"
     }
 ];
 

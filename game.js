@@ -2,7 +2,7 @@
 const PLAYER_SIZE = 64;
 const PLAYER_SIZE_STEP = 8;
 const PLAYER_SIZE_MIN = 32;
-const PLAYER_SIZE_MAX = 128;
+const PLAYER_SIZE_MAX = 96;
 
 class GameNavigator {
     constructor() {
@@ -41,6 +41,10 @@ class GameNavigator {
     init() {
         this.mapElement = document.getElementById('gameMap');
         this.player.element = document.getElementById('player');
+        this.player.transformWrapper = this.player.element.querySelector('.player-transform-wrapper');
+        this.bubbleElement = document.getElementById('playerBubble');
+        this.bubbleContent = document.getElementById('bubbleContent');
+        this.bubbleTimer = null;
         
         // 初始化网站卡片
         this.createSiteCards();
@@ -143,10 +147,12 @@ class GameNavigator {
     updatePlayerPosition() {
         this.player.element.style.left = this.player.x + 'px';
         this.player.element.style.top = this.player.y + 'px';
+
+        this.updateBubblePosition();
         
         // 跳跃时：保持跳跃前的方向，不旋转
         if (this.player.jumping) {
-            this.player.element.style.transform = `scaleX(${this.player.direction})`;
+            this.player.transformWrapper.style.transform = `scaleX(${this.player.direction})`;
             return;
         }
         
@@ -154,17 +160,17 @@ class GameNavigator {
         if (this.player.velocityX > 0.5) {
             this.player.direction = 1;
             const tilt = Math.min(this.player.velocityX * 2, 15);
-            this.player.element.style.transform = `scaleX(1) rotate(${tilt}deg)`;
+            this.player.transformWrapper.style.transform = `scaleX(1) rotate(${tilt}deg)`;
         }
         // 向左移动时的倾斜效果
         else if (this.player.velocityX < -0.5) {
             this.player.direction = -1;
             const tilt = Math.min(Math.abs(this.player.velocityX) * 2, 15);
-            this.player.element.style.transform = `scaleX(-1) rotate(${tilt}deg)`;
+            this.player.transformWrapper.style.transform = `scaleX(-1) rotate(${tilt}deg)`;
         }
         // 速度很小时，保持最后的方向
         else {
-            this.player.element.style.transform = `scaleX(${this.player.direction})`;
+            this.player.transformWrapper.style.transform = `scaleX(${this.player.direction})`;
         }
     }
 
@@ -271,15 +277,26 @@ class GameNavigator {
     changePlayerSize(delta) {
         const currentSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--player-size'));
         const newSize = Math.max(PLAYER_SIZE_MIN, Math.min(PLAYER_SIZE_MAX, currentSize + delta));
-        
+
+        const isMax = currentSize >= PLAYER_SIZE_MAX && delta > 0;
+        const isMin = currentSize <= PLAYER_SIZE_MIN && delta < 0;
+
+        if (isMax || isMin) {
+            const tip = isMax
+                ? sites.find(s => s.category === 'grow')?.tip || '已经是最大了！'
+                : sites.find(s => s.category === 'shrink')?.tip || '已经是最小了！';
+            this.showBubble(tip);
+            return;
+        }
+
         if (newSize === currentSize) return;
-        
+
         document.documentElement.style.setProperty('--player-size', newSize + 'px');
-        
+
         // 同步更新 JS 中的尺寸（用于碰撞检测）
         // PLAYER_SIZE 是 const，所以用实例属性覆盖
         this.currentPlayerSize = newSize;
-        
+
         // 调整玩家位置，防止变大时卡进地面
         const mapRect = this.mapElement.getBoundingClientRect();
         const maxY = mapRect.height - newSize;
@@ -290,9 +307,36 @@ class GameNavigator {
         if (this.player.x > maxX) {
             this.player.x = maxX;
         }
-        
+
         // 更新地面位置
         this.player.groundY = mapRect.height - newSize;
+    }
+
+    showBubble(text) {
+        if (!this.bubbleElement || !this.bubbleContent) return;
+
+        this.bubbleContent.textContent = text;
+        this.bubbleElement.classList.add('visible');
+
+        this.updateBubblePosition();
+
+        if (this.bubbleTimer) {
+            clearTimeout(this.bubbleTimer);
+        }
+
+        this.bubbleTimer = setTimeout(() => {
+            this.hideBubble();
+        }, 2000);
+    }
+
+    updateBubblePosition() {
+        // 气泡框现在使用 CSS 定位，不需要 JavaScript 更新位置
+    }
+
+    hideBubble() {
+        if (this.bubbleElement) {
+            this.bubbleElement.classList.remove('visible');
+        }
     }
 
     hitCardFromBelow(site, cardElement) {

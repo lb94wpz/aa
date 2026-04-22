@@ -21,14 +21,20 @@
         <div class="game-map" id="gameMap">
             <!-- 玩家角色 -->
             <div class="player" id="player">
-                <div class="player-sprite">
-                    <div class="mario">
-                        <div class="mario-hat"></div>
-                        <div class="mario-face"></div>
-                        <div class="mario-body"></div>
+                <div class="player-shadow"></div>
+                <div class="player-transform-wrapper">
+                    <div class="player-sprite">
+                        <div class="mario">
+                            <div class="mario-hat"></div>
+                            <div class="mario-face"></div>
+                            <div class="mario-body"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="player-shadow"></div>
+                <div class="player-bubble" id="playerBubble">
+                    <div class="bubble-content" id="bubbleContent"></div>
+                    <div class="bubble-tail"></div>
+                </div>
             </div>
 
             <!-- 网站卡片将通过 JS 动态生成 -->
