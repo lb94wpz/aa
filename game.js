@@ -111,6 +111,10 @@ class GameNavigator {
             if (['arrowleft', 'arrowright', 'arrowup', ' '].includes(e.key.toLowerCase())) {
                 e.preventDefault();
             }
+            // ESC 键关闭对话框
+            if (e.key === 'Escape' && this.dialogOpen) {
+                this.hideDialog();
+            }
         });
 
         document.addEventListener('keyup', (e) => {
