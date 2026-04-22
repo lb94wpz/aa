@@ -1,9 +1,13 @@
 // ========== 游戏引擎 ==========
 const PLAYER_SIZE = 64;
+const PLAYER_SIZE_STEP = 8;
+const PLAYER_SIZE_MIN = 32;
+const PLAYER_SIZE_MAX = 128;
 
 class GameNavigator {
     constructor() {
         document.documentElement.style.setProperty('--player-size', PLAYER_SIZE + 'px');
+        this.currentPlayerSize = PLAYER_SIZE;
         
         this.player = {
             x: 400,
@@ -49,7 +53,7 @@ class GameNavigator {
         
         // 设置玩家初始位置为底部
         const mapRect = this.mapElement.getBoundingClientRect();
-        this.player.groundY = mapRect.height - PLAYER_SIZE;
+        this.player.groundY = mapRect.height - this.currentPlayerSize;
         this.player.y = this.player.groundY;
         
         // 启动游戏循环
@@ -130,8 +134,8 @@ class GameNavigator {
     handleResize() {
         // 确保玩家在地图范围内
         const mapRect = this.mapElement.getBoundingClientRect();
-        this.player.x = Math.min(Math.max(this.player.x, 0), mapRect.width - PLAYER_SIZE);
-        this.player.groundY = Math.min(this.player.groundY, mapRect.height - PLAYER_SIZE);
+        this.player.x = Math.min(Math.max(this.player.x, 0), mapRect.width - this.currentPlayerSize);
+        this.player.groundY = Math.min(this.player.groundY, mapRect.height - this.currentPlayerSize);
         
         this.updatePlayerPosition();
     }
@@ -168,8 +172,8 @@ class GameNavigator {
         const playerRect = {
             x: this.player.x,
             y: this.player.y,
-            width: PLAYER_SIZE,
-            height: PLAYER_SIZE
+            width: this.currentPlayerSize,
+            height: this.currentPlayerSize
         };
 
         let hitCardFromBelow = null;
@@ -243,10 +247,52 @@ class GameNavigator {
             this.shakeCard(collidedCards[0].element);
         }
 
-        // 只有从下方碰撞才弹窗
+        // 只有从下方碰撞才弹窗（仅对 website 类型）
         if (hitCardFromBelow) {
-            this.hitCardFromBelow(hitCardFromBelow.data, hitCardFromBelow.element);
+            const category = hitCardFromBelow.data.category;
+            
+            if (category === 'grow') {
+                this.changePlayerSize(PLAYER_SIZE_STEP);
+                this.shakeCard(hitCardFromBelow.element);
+                this.player.velocityY = 0;
+            } else if (category === 'shrink') {
+                this.changePlayerSize(-PLAYER_SIZE_STEP);
+                this.shakeCard(hitCardFromBelow.element);
+                this.player.velocityY = 0;
+            } else if (category === 'block') {
+                this.shakeCard(hitCardFromBelow.element);
+                this.player.velocityY = 0;
+            } else {
+                this.hitCardFromBelow(hitCardFromBelow.data, hitCardFromBelow.element);
+            }
         }
+    }
+
+    changePlayerSize(delta) {
+        const currentSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--player-size'));
+        const newSize = Math.max(PLAYER_SIZE_MIN, Math.min(PLAYER_SIZE_MAX, currentSize + delta));
+        
+        if (newSize === currentSize) return;
+        
+        document.documentElement.style.setProperty('--player-size', newSize + 'px');
+        
+        // 同步更新 JS 中的尺寸（用于碰撞检测）
+        // PLAYER_SIZE 是 const，所以用实例属性覆盖
+        this.currentPlayerSize = newSize;
+        
+        // 调整玩家位置，防止变大时卡进地面
+        const mapRect = this.mapElement.getBoundingClientRect();
+        const maxY = mapRect.height - newSize;
+        if (this.player.y > maxY) {
+            this.player.y = maxY;
+        }
+        const maxX = mapRect.width - newSize;
+        if (this.player.x > maxX) {
+            this.player.x = maxX;
+        }
+        
+        // 更新地面位置
+        this.player.groundY = mapRect.height - newSize;
     }
 
     hitCardFromBelow(site, cardElement) {
@@ -316,7 +362,7 @@ class GameNavigator {
 
     gameLoop() {
         const mapRect = this.mapElement.getBoundingClientRect();
-        const maxX = mapRect.width - PLAYER_SIZE;
+        const maxX = mapRect.width - this.currentPlayerSize;
 
         // 左右移动（去掉上下移动）
         if (this.keys['arrowleft']) {

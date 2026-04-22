@@ -8,7 +8,8 @@ const sites = [
         icon: "🎮",
         color: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         position: { x: 100, y: 100 },
-        size: { width: 120, height: 120 }
+        size: { width: 120, height: 120 },
+        category: "website"
     },
     {
         id: 2,
@@ -18,7 +19,8 @@ const sites = [
         icon: "🕹️",
         color: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
         position: { x: 300, y: 100 },
-        size: { width: 120, height: 120 }
+        size: { width: 120, height: 120 },
+        category: "website"
     },
     {
         id: 3,
@@ -28,7 +30,8 @@ const sites = [
         icon: "👾",
         color: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
         position: { x: 500, y: 100 },
-        size: { width: 120, height: 120 }
+        size: { width: 120, height: 120 },
+        category: "website"
     },
     {
         id: 4,
@@ -38,7 +41,8 @@ const sites = [
         icon: "💻",
         color: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
         position: { x: 100, y: 300 },
-        size: { width: 120, height: 120 }
+        size: { width: 120, height: 120 },
+        category: "website"
     },
     {
         id: 5,
@@ -48,7 +52,41 @@ const sites = [
         icon: "📦",
         color: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
         position: { x: 300, y: 300 },
-        size: { width: 120, height: 120 }
+        size: { width: 120, height: 120 },
+        category: "website"
+    },
+    {
+        id: 6,
+        name: "金币方块",
+        url: "",
+        description: "顶一下获得金币",
+        icon: "❓",
+        color: "linear-gradient(135deg, #f5af19 0%, #f12711 100%)",
+        position: { x: 500, y: 300 },
+        size: { width: 120, height: 120 },
+        category: "block"
+    },
+    {
+        id: 7,
+        name: "变大蘑菇",
+        url: "",
+        description: "顶一下变大一次",
+        icon: "🔴",
+        color: "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)",
+        position: { x: 1000, y: 300 },
+        size: { width: 120, height: 120 },
+        category: "grow"
+    },
+    {
+        id: 8,
+        name: "变小蘑菇",
+        url: "",
+        description: "顶一下变小一次",
+        icon: "🔵",
+        color: "linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)",
+        position: { x: 700, y: 300 },
+        size: { width: 120, height: 120 },
+        category: "shrink"
     }
 ];
 
