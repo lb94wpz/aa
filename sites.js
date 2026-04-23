@@ -1,34 +1,14 @@
 // 网站配置数据 - 易于扩展
 const sites = [
+    // === 起步区：教学区域 ===
     {
-        name: "Wii Menu",
-        url: "https://wii.wpz.homes/",
-        description: "Wii 游戏在线平台，重温经典体感游戏的乐趣",
-        icon: "🎮",
-        color: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        position: { x: 2000, y: 500 },
+        name: "金币方块",
+        description: "从下方顶一下试试！",
+        icon: "❓",
+        color: "linear-gradient(135deg, #f5af19 0%, #f12711 100%)",
+        position: { x: 150, y: 300 },
         size: { width: 120, height: 120 },
-        category: "website"
-    },
-    {
-        name: "GBA 2.0",
-        url: "https://gba.wpz.homes/",
-        description: "GBA 游戏模拟器，掌机经典随时畅玩",
-        icon: "🕹️",
-        color: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-        position: { x: 300, y: 100 },
-        size: { width: 120, height: 120 },
-        category: "website"
-    },
-    {
-        name: "FC 游戏",
-        url: "https://nes.wpz.homes/",
-        description: "FC/NES 红白机游戏，魂斗罗、超级玛丽等经典回忆",
-        icon: "👾",
-        color: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-        position: { x: 500, y: 100 },
-        size: { width: 120, height: 120 },
-        category: "website"
+        category: "block"
     },
     {
         name: "DOS 游戏",
@@ -36,51 +16,129 @@ const sites = [
         description: "DOS 经典游戏模拟器，重返 80、90 年代",
         icon: "💻",
         color: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
-        position: { x: 100, y: 300 },
+        position: { x: 400, y: 300 },
         size: { width: 120, height: 120 },
         category: "website"
     },
+    {
+        name: "砖块",
+        description: "我是一块砖，哪里需要往哪搬！",
+        icon: "🧱",
+        color: "linear-gradient(135deg, #8B4513 0%, #A0522D 100%)",
+        position: { x: 600, y: 300 },
+        size: { width: 120, height: 120 },
+        category: "block"
+    },
+
+    // === 第一平台区：初次攀爬 ===
+    {
+        name: "金币方块",
+        description: "跳上来获取奖励！",
+        icon: "❓",
+        color: "linear-gradient(135deg, #f5af19 0%, #f12711 100%)",
+        position: { x: 800, y: 480 },
+        size: { width: 120, height: 120 },
+        category: "block"
+    },
+    {
+        name: "FC 游戏",
+        url: "https://nes.wpz.homes/",
+        description: "FC/NES 红白机游戏，魂斗罗、超级玛丽等经典回忆",
+        icon: "👾",
+        color: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+        position: { x: 800, y: 100 },
+        size: { width: 120, height: 120 },
+        category: "website"
+    },
+    {
+        name: "变大蘑菇",
+        description: "顶一下变大一次",
+        icon: "🔴",
+        color: "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)",
+        position: { x: 1050, y: 300 },
+        size: { width: 120, height: 120 },
+        category: "grow",
+        tip: "你是要上天吗？还想继续变大？"
+    },
+    {
+        name: "金币方块",
+        description: "双跳才能到这里！",
+        icon: "❓",
+        color: "linear-gradient(135deg, #f5af19 0%, #f12711 100%)",
+        position: { x: 1250, y: 100 },
+        size: { width: 120, height: 120 },
+        category: "block"
+    },
+
+    // === 挑战区：小心障碍 ===
+    {
+        name: "变小蘑菇",
+        description: "顶一下变小一次",
+        icon: "🔵",
+        color: "linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)",
+        position: { x: 1450, y: 300 },
+        size: { width: 120, height: 120 },
+        category: "shrink",
+        tip: "还顶！再小你就看不到我了！"
+    },
+    {
+        name: "GBA 2.0",
+        url: "https://gba.wpz.homes/",
+        description: "GBA 游戏模拟器，掌机经典随时畅玩",
+        icon: "🕹️",
+        color: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+        position: { x: 1650, y: 100 },
+        size: { width: 120, height: 120 },
+        category: "website"
+    },
+    {
+        name: "砖块",
+        description: "我是一块砖，哪里需要往哪搬！",
+        icon: "🧱",
+        color: "linear-gradient(135deg, #8B4513 0%, #A0522D 100%)",
+        position: { x: 1650, y: 480 },
+        size: { width: 120, height: 120 },
+        category: "block"
+    },
+
+    // === 最终冲刺：登顶 ===
     {
         name: "ONS 游戏",
         url: "https://ons.wpz.homes/",
         description: "ONS 模拟器，视觉小说和 AVG 游戏在线运行",
         icon: "📦",
         color: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-        position: { x: 300, y: 300 },
+        position: { x: 1900, y: 300 },
         size: { width: 120, height: 120 },
         category: "website"
     },
     {
-        name: "金币方块",
-        url: "",
-        description: "顶一下获得金币",
-        icon: "❓",
-        color: "linear-gradient(135deg, #f5af19 0%, #f12711 100%)",
-        position: { x: 500, y: 300 },
+        name: "砖块",
+        description: "我是一块砖，哪里需要往哪搬！",
+        icon: "🧱",
+        color: "linear-gradient(135deg, #8B4513 0%, #A0522D 100%)",
+        position: { x: 2100, y: 300 },
         size: { width: 120, height: 120 },
         category: "block"
     },
     {
-        name: "变大蘑菇",
-        url: "",
-        description: "顶一下变大一次",
-        icon: "🔴",
-        color: "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)",
-        position: { x: 1000, y: 300 },
+        name: "金币方块",
+        description: "最后的奖励！",
+        icon: "❓",
+        color: "linear-gradient(135deg, #f5af19 0%, #f12711 100%)",
+        position: { x: 2100, y: 100 },
         size: { width: 120, height: 120 },
-        category: "grow",
-        tip: "你是要上天吗？还想继续变大？"
+        category: "block"
     },
     {
-        name: "变小蘑菇",
-        url: "",
-        description: "顶一下变小一次",
-        icon: "🔵",
-        color: "linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)",
-        position: { x: 700, y: 300 },
+        name: "Wii Menu",
+        url: "https://wii.wpz.homes/",
+        description: "Wii 游戏在线平台，重温经典体感游戏的乐趣",
+        icon: "🎮",
+        color: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        position: { x: 2350, y: 100 },
         size: { width: 120, height: 120 },
-        category: "shrink",
-        tip: "还顶！再小你就看不到我了！"
+        category: "website"
     }
 ];
 
