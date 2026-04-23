@@ -139,7 +139,9 @@ class GameNavigator {
                 x: site.position.x,
                 y: site.position.y,
                 width: cardWidth,
-                height: cardHeight
+                height: cardHeight,
+                // 碰撞框向上扩展的偏移量（管道的 ::before 帽檐向上延伸16px）
+                collisionOffsetTop: site.category === 'pipe' ? 10 : 0
             });
         });
     }
@@ -275,11 +277,12 @@ class GameNavigator {
         let onPlatform = false;
 
         this.siteCards.forEach(card => {
+            const offsetTop = card.collisionOffsetTop;
             const cardRect = {
                 x: card.x,
-                y: card.y,
+                y: card.y - offsetTop,
                 width: card.width,
-                height: card.height
+                height: card.height + offsetTop
             };
 
             // 检测基础碰撞（不使用 padding，精确检测）
