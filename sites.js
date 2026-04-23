@@ -53,6 +53,15 @@ const sites = [
         category: "website"
     },
     {
+        name: "管道",
+        description: "跳上去才能通过！",
+        icon: "",
+        color: "",
+        position: { x: 935, y: 400 },
+        size: { width: 100 },
+        category: "pipe"
+    },
+    {
         name: "变大蘑菇",
         description: "顶一下变大一次",
         icon: "🔴",
@@ -105,6 +114,15 @@ const sites = [
     },
 
     // === 最终冲刺：登顶 ===
+    {
+        name: "管道",
+        description: "跳上去才能通过！",
+        icon: "",
+        color: "",
+        position: { x: 1785, y: 400 },
+        size: { width: 100 },
+        category: "pipe"
+    },
     {
         name: "ONS 游戏",
         url: "https://ons.wpz.homes/",

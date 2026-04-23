@@ -100,33 +100,39 @@ class GameNavigator {
     }
 
     createSiteCards() {
+        const mapHeight = this.mapElement.getBoundingClientRect().height;
+
         sites.forEach((site) => {
             const card = document.createElement('div');
-            card.className = 'site-card';
-            card.style.background = site.color;
+            card.className = 'site-card ' + site.category;
+            if (site.category !== 'pipe') {
+                card.style.background = site.color;
+            }
             card.style.left = site.position.x + 'px';
             card.style.top = site.position.y + 'px';
-            
+
             const cardWidth = site.size ? site.size.width : 120;
-            const cardHeight = site.size ? site.size.height : 120;
+            const cardHeight = site.category === 'pipe'
+                ? mapHeight - site.position.y
+                : (site.size ? site.size.height : 120);
             card.style.width = cardWidth + 'px';
             card.style.height = cardHeight + 'px';
-            
+
             card.title = site.description;
             card.innerHTML = `
                 <div class="site-icon">${site.icon}</div>
                 <div class="site-name">${site.name}</div>
             `;
-            
+
             // 点击访问
             card.addEventListener('click', () => {
                 if (site.category === 'website') {
                     window.open(site.url, '_blank');
                 }
             });
-            
+
             this.worldElement.appendChild(card);
-            
+
             this.siteCards.push({
                 element: card,
                 data: site,
@@ -196,6 +202,14 @@ class GameNavigator {
         }, 0);
         this.worldWidth = Math.max(mapRect.width, maxXFromSites + 200);
         this.worldElement.style.width = this.worldWidth + 'px';
+
+        // 更新管道高度
+        this.siteCards.forEach(card => {
+            if (card.data.category === 'pipe') {
+                card.height = mapRect.height - card.y;
+                card.element.style.height = card.height + 'px';
+            }
+        });
 
         // 确保玩家在地图范围内
         this.player.x = Math.min(Math.max(this.player.x, 0), this.worldWidth - this.currentPlayerSize);
@@ -340,6 +354,8 @@ class GameNavigator {
                 this.player.velocityY = 0;
             } else if (category === 'coin') {
                 this.collectCoin(hitCardFromBelow);
+                this.player.velocityY = 0;
+            } else if (category === 'pipe') {
                 this.player.velocityY = 0;
             } else if (category === 'block') {
                 if (this.currentPlayerSize >= PLAYER_SIZE_MAX) {
