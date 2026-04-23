@@ -111,6 +111,7 @@ class GameNavigator {
             card.style.width = cardWidth + 'px';
             card.style.height = cardHeight + 'px';
             
+            card.title = site.description;
             card.innerHTML = `
                 <div class="site-icon">${site.icon}</div>
                 <div class="site-name">${site.name}</div>
@@ -118,7 +119,9 @@ class GameNavigator {
             
             // 点击访问
             card.addEventListener('click', () => {
-                window.open(site.url, '_blank');
+                if (site.category === 'website') {
+                    window.open(site.url, '_blank');
+                }
             });
             
             this.worldElement.appendChild(card);

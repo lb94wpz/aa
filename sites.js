@@ -42,7 +42,7 @@ const sites = [
     },
     {
         name: "ONS 游戏",
-        url: "https://blog.wpz.homes/xxxxx/",
+        url: "https://ons.wpz.homes/",
         description: "ONS 模拟器，视觉小说和 AVG 游戏在线运行",
         icon: "📦",
         color: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
