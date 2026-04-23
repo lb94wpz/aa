@@ -64,6 +64,37 @@ body {
     margin-bottom: 20px;
 }
 
+.coin-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    color: #f5af19;
+    margin-top: 12px;
+    padding: 6px 16px;
+    background: rgba(245, 175, 25, 0.1);
+    border: 2px solid rgba(245, 175, 25, 0.4);
+    border-radius: 20px;
+    position: relative;
+}
+
+.coin-float {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    color: #f5af19;
+    font-size: 0.85rem;
+    font-weight: bold;
+    animation: coinFloat 0.8s ease-out forwards;
+    pointer-events: none;
+    text-shadow: 1px 1px 0 #000;
+}
+
+@keyframes coinFloat {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-25px); }
+}
+
 .pixel-title {
     font-size: 2rem;
     color: var(--accent-color);

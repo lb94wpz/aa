@@ -8,6 +8,7 @@ class GameNavigator {
     constructor() {
         document.documentElement.style.setProperty('--player-size', PLAYER_SIZE + 'px');
         this.currentPlayerSize = PLAYER_SIZE;
+        this.totalCoins = 0;
         
         this.player = {
             x: 400,
@@ -337,6 +338,9 @@ class GameNavigator {
                 this.changePlayerSize(-PLAYER_SIZE_STEP);
                 this.shakeCard(hitCardFromBelow.element);
                 this.player.velocityY = 0;
+            } else if (category === 'coin') {
+                this.collectCoin(hitCardFromBelow);
+                this.player.velocityY = 0;
             } else if (category === 'block') {
                 if (this.currentPlayerSize >= PLAYER_SIZE_MAX) {
                     this.breakCard(hitCardFromBelow);
@@ -485,6 +489,48 @@ class GameNavigator {
         if (idx !== -1) {
             this.siteCards.splice(idx, 1);
         }
+    }
+
+    collectCoin(card) {
+        const infinite = card.data.coins === Infinity;
+        // 方块不足10金币永远获取1，否则10%概率获取10
+        let reward = 1;
+        if ((infinite || card.data.coins >= 10) && Math.random() < 0.1) {
+            reward = 10;
+        }
+        if (!infinite) {
+            reward = Math.min(reward, card.data.coins);
+        }
+
+        if (!infinite) {
+            card.data.coins -= reward;
+        }
+        this.totalCoins += reward;
+        document.getElementById('coinCount').textContent = this.totalCoins;
+
+        // 显示获得金币的浮动文字
+        const counter = document.getElementById('coinCounter');
+        const floater = document.createElement('span');
+        floater.className = 'coin-float';
+        floater.textContent = '+' + reward;
+        counter.appendChild(floater);
+        setTimeout(() => floater.remove(), 800);
+
+        // 金币耗尽变为砖块（无限金币方块不会耗尽）
+        if (!infinite && card.data.coins <= 0) {
+            card.data.category = 'block';
+            card.data.name = '砖块';
+            card.data.description = '金币已被掏空，只剩一块砖了';
+            card.element.querySelector('.site-icon').textContent = '🧱';
+            card.element.querySelector('.site-name').textContent = '砖块';
+            card.element.style.background = 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)';
+            card.element.title = card.data.description;
+        } else {
+            const remaining = infinite ? '∞' : card.data.coins;
+            card.element.title = `还剩 ${remaining} 枚金币`;
+        }
+
+        this.shakeCard(card.element);
     }
 
     showDialog(site) {

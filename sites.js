@@ -2,13 +2,14 @@
 const sites = [
     // === 起步区：教学区域 ===
     {
-        name: "金币方块",
+        name: "金币",
         description: "从下方顶一下试试！",
-        icon: "❓",
+        icon: "💰",
         color: "linear-gradient(135deg, #f5af19 0%, #f12711 100%)",
         position: { x: 150, y: 300 },
         size: { width: 120, height: 120 },
-        category: "block"
+        category: "coin",
+        coins: 10
     },
     {
         name: "DOS 游戏",
@@ -32,13 +33,14 @@ const sites = [
 
     // === 第一平台区：初次攀爬 ===
     {
-        name: "金币方块",
+        name: "金币",
         description: "跳上来获取奖励！",
-        icon: "❓",
+        icon: "💰",
         color: "linear-gradient(135deg, #f5af19 0%, #f12711 100%)",
         position: { x: 800, y: 480 },
         size: { width: 120, height: 120 },
-        category: "block"
+        category: "coin",
+        coins: 15
     },
     {
         name: "FC 游戏",
@@ -61,13 +63,14 @@ const sites = [
         tip: "你是要上天吗？还想继续变大？"
     },
     {
-        name: "金币方块",
+        name: "金币",
         description: "双跳才能到这里！",
-        icon: "❓",
+        icon: "💰",
         color: "linear-gradient(135deg, #f5af19 0%, #f12711 100%)",
         position: { x: 1250, y: 100 },
         size: { width: 120, height: 120 },
-        category: "block"
+        category: "coin",
+        coins: 20
     },
 
     // === 挑战区：小心障碍 ===
@@ -122,13 +125,14 @@ const sites = [
         category: "block"
     },
     {
-        name: "金币方块",
-        description: "最后的奖励！",
-        icon: "❓",
+        name: "金币",
+        description: "取之不尽的宝藏！",
+        icon: "💰",
         color: "linear-gradient(135deg, #f5af19 0%, #f12711 100%)",
         position: { x: 2100, y: 100 },
         size: { width: 120, height: 120 },
-        category: "block"
+        category: "coin",
+        coins: Infinity
     },
     {
         name: "Wii Menu",
