@@ -382,8 +382,8 @@ class GameNavigator {
 
         if (isMax || isMin) {
             const tip = isMax
-                ? sites.find(s => s.category === 'grow')?.tip || '已经是最大了！'
-                : sites.find(s => s.category === 'shrink')?.tip || '已经是最小了！';
+                ? sites.find(s => s.category === 'grow')?.mario || '已经是最大了！'
+                : sites.find(s => s.category === 'shrink')?.mario || '已经是最小了！';
             this.showBubble(tip);
             return;
         }
@@ -514,8 +514,10 @@ class GameNavigator {
         const infinite = card.data.coins === Infinity;
         // 方块不足10金币永远获取1，否则10%概率获取10
         let reward = 1;
+        let lucky = false;
         if ((infinite || card.data.coins >= 10) && Math.random() < 0.1) {
             reward = 10;
+            lucky = true;
         }
         if (!infinite) {
             reward = Math.min(reward, card.data.coins);
@@ -550,6 +552,11 @@ class GameNavigator {
         }
 
         this.shakeCard(card.element);
+
+        // 幸运 10 金币时显示 mario 对话
+        if (lucky && card.data.mario) {
+            this.showBubble(card.data.mario);
+        }
     }
 
     showDialog(site) {

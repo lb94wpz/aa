@@ -9,7 +9,8 @@ const sites = [
         position: { x: 150, y: 300 },
         size: { width: 120, height: 120 },
         category: "coin",
-        coins: 10
+        coins: 10,
+        mario: "新手运气不错嘛！一口气 10 枚！"
     },
     {
         name: "DOS 游戏",
@@ -40,7 +41,8 @@ const sites = [
         position: { x: 800, y: 480 },
         size: { width: 120, height: 120 },
         category: "coin",
-        coins: 15
+        coins: 15,
+        mario: "哇哦！一发入魂 10 金币！"
     },
     {
         name: "FC 游戏",
@@ -69,7 +71,7 @@ const sites = [
         position: { x: 1050, y: 300 },
         size: { width: 120, height: 120 },
         category: "grow",
-        tip: "你是要上天吗？还想继续变大？"
+        mario: "你是要上天吗？还想继续变大？"
     },
     {
         name: "金币",
@@ -79,7 +81,8 @@ const sites = [
         position: { x: 1250, y: 100 },
         size: { width: 120, height: 120 },
         category: "coin",
-        coins: 20
+        coins: 20,
+        mario: "双跳的奖励！10 金币到手！"
     },
 
     // === 挑战区：小心障碍 ===
@@ -91,7 +94,7 @@ const sites = [
         position: { x: 1450, y: 300 },
         size: { width: 120, height: 120 },
         category: "shrink",
-        tip: "还顶！再小你就看不到我了！"
+        mario: "还顶！再小你就看不到我了！"
     },
     {
         name: "GBA 2.0",
@@ -150,7 +153,8 @@ const sites = [
         position: { x: 2100, y: 100 },
         size: { width: 120, height: 120 },
         category: "coin",
-        coins: Infinity
+        coins: Infinity,
+        mario: "永动机！10 金币源源不断！"
     },
     {
         name: "Wii Menu",
