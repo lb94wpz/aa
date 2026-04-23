@@ -31,6 +31,9 @@ class GameNavigator {
         
         this.keys = {};
         this.jumpKeyHeld = false;
+        this.doubleTap = { arrowleft: false, arrowright: false };
+        this.lastTapTime = { arrowleft: 0, arrowright: 0 };
+        this.keyReleased = { arrowleft: true, arrowright: true };
         this.siteCards = [];
         this.activeCard = null;
         this.mapElement = null;
@@ -104,17 +107,6 @@ class GameNavigator {
                 window.open(site.url, '_blank');
             });
             
-            // 鼠标悬停显示信息
-            card.addEventListener('mouseenter', () => {
-                this.showInfo(site);
-            });
-            
-            card.addEventListener('mouseleave', () => {
-                if (this.activeCard !== site) {
-                    this.hideInfo();
-                }
-            });
-            
             this.mapElement.appendChild(card);
             
             this.siteCards.push({
@@ -130,12 +122,23 @@ class GameNavigator {
 
     bindKeys() {
         document.addEventListener('keydown', (e) => {
-            this.keys[e.key.toLowerCase()] = true;
-            // 阻止方向键和空格键滚动页面
-            if (['arrowleft', 'arrowright', 'arrowup', ' '].includes(e.key.toLowerCase())) {
+            const key = e.key.toLowerCase();
+            this.keys[key] = true;
+
+            if (['arrowleft', 'arrowright', 'arrowup', ' '].includes(key)) {
                 e.preventDefault();
             }
-            // ESC 键关闭对话框
+
+            // 检测连续按两次：上次按键松开过 且 在400ms内再次按下
+            if ((key === 'arrowleft' || key === 'arrowright') && !e.repeat) {
+                const now = Date.now();
+                if (this.keyReleased[key] && (now - this.lastTapTime[key]) < 400) {
+                    this.doubleTap[key] = true;
+                }
+                this.lastTapTime[key] = now;
+                this.keyReleased[key] = false;
+            }
+
             if (e.key === 'Escape') {
                 if (this.helpDialogOpen) {
                     this.hideHelpDialog();
@@ -146,7 +149,13 @@ class GameNavigator {
         });
 
         document.addEventListener('keyup', (e) => {
-            this.keys[e.key.toLowerCase()] = false;
+            const key = e.key.toLowerCase();
+            this.keys[key] = false;
+
+            if (key === 'arrowleft' || key === 'arrowright') {
+                this.keyReleased[key] = true;
+                this.doubleTap[key] = false;
+            }
         });
     }
     
@@ -182,18 +191,24 @@ class GameNavigator {
         }
         
         // 根据移动速度添加倾斜效果（向右时）
-        if (this.player.velocityX > 0.5) {
+        if (this.player.velocityX > 3) {
             this.player.direction = 1;
-            const tilt = Math.min(this.player.velocityX * 2, 15);
+            const tilt = Math.min((this.player.velocityX - 3) * 2, 15);
             this.player.transformWrapper.style.transform = `scaleX(1) rotate(${tilt}deg)`;
         }
-        // 向左移动时的倾斜效果
-        else if (this.player.velocityX < -0.5) {
+        else if (this.player.velocityX < -3) {
             this.player.direction = -1;
-            const tilt = Math.min(Math.abs(this.player.velocityX) * 2, 15);
+            const tilt = Math.min((Math.abs(this.player.velocityX) - 3) * 2, 15);
             this.player.transformWrapper.style.transform = `scaleX(-1) rotate(${tilt}deg)`;
         }
-        // 速度很小时，保持最后的方向
+        else if (this.player.velocityX > 0.5) {
+            this.player.direction = 1;
+            this.player.transformWrapper.style.transform = `scaleX(1)`;
+        }
+        else if (this.player.velocityX < -0.5) {
+            this.player.direction = -1;
+            this.player.transformWrapper.style.transform = `scaleX(-1)`;
+        }
         else {
             this.player.transformWrapper.style.transform = `scaleX(${this.player.direction})`;
         }
@@ -432,22 +447,33 @@ class GameNavigator {
     gameLoop() {
         const mapRect = this.mapElement.getBoundingClientRect();
         const maxX = mapRect.width - this.currentPlayerSize;
+        const TAP_SPEED = 3;
+        const CONTINUOUS_ACCEL = 0.4;
+        const CONTINUOUS_MAX = 10;
 
-        // 左右移动（去掉上下移动）
         if (this.keys['arrowleft']) {
-            // 连续按键加速
-            this.player.velocityX -= this.player.acceleration;
-            if (this.player.velocityX < -this.player.maxSpeed) {
-                this.player.velocityX = -this.player.maxSpeed;
+            if (this.doubleTap.arrowleft) {
+                this.player.velocityX -= CONTINUOUS_ACCEL;
+                if (this.player.velocityX < -CONTINUOUS_MAX) {
+                    this.player.velocityX = -CONTINUOUS_MAX;
+                }
+            } else {
+                if (this.player.velocityX > -TAP_SPEED) {
+                    this.player.velocityX = -TAP_SPEED;
+                }
             }
         } else if (this.keys['arrowright']) {
-            // 连续按键加速
-            this.player.velocityX += this.player.acceleration;
-            if (this.player.velocityX > this.player.maxSpeed) {
-                this.player.velocityX = this.player.maxSpeed;
+            if (this.doubleTap.arrowright) {
+                this.player.velocityX += CONTINUOUS_ACCEL;
+                if (this.player.velocityX > CONTINUOUS_MAX) {
+                    this.player.velocityX = CONTINUOUS_MAX;
+                }
+            } else {
+                if (this.player.velocityX < TAP_SPEED) {
+                    this.player.velocityX = TAP_SPEED;
+                }
             }
         } else {
-            // 没有按键时减速
             if (this.player.velocityX > 0) {
                 this.player.velocityX -= this.player.deceleration;
                 if (this.player.velocityX < 0) this.player.velocityX = 0;
