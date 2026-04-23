@@ -12,10 +12,6 @@ class GameNavigator {
         this.player = {
             x: 400,
             y: 0,
-            baseSpeed: 5,
-            speed: 5,
-            maxSpeed: 10,
-            acceleration: 0.3,
             deceleration: 0.5,
             velocityX: 0,
             jumping: false,
@@ -35,7 +31,6 @@ class GameNavigator {
         this.lastTapTime = { arrowleft: 0, arrowright: 0 };
         this.keyReleased = { arrowleft: true, arrowright: true };
         this.siteCards = [];
-        this.activeCard = null;
         this.mapElement = null;
         
         this.init();
@@ -104,7 +99,7 @@ class GameNavigator {
     }
 
     createSiteCards() {
-        sites.forEach((site, index) => {
+        sites.forEach((site) => {
             const card = document.createElement('div');
             card.className = 'site-card';
             card.style.background = site.color;
@@ -218,8 +213,6 @@ class GameNavigator {
         this.player.element.style.left = this.player.x + 'px';
         this.player.element.style.top = this.player.y + 'px';
 
-        this.updateBubblePosition();
-        
         // 跳跃时：保持跳跃前的方向，不旋转
         if (this.player.jumping) {
             this.player.transformWrapper.style.transform = `scaleX(${this.player.direction})`;
@@ -398,8 +391,6 @@ class GameNavigator {
         this.bubbleContent.textContent = text;
         this.bubbleElement.classList.add('visible');
 
-        this.updateBubblePosition();
-
         if (this.bubbleTimer) {
             clearTimeout(this.bubbleTimer);
         }
@@ -407,10 +398,6 @@ class GameNavigator {
         this.bubbleTimer = setTimeout(() => {
             this.hideBubble();
         }, 2000);
-    }
-
-    updateBubblePosition() {
-        // 气泡框现在使用 CSS 定位，不需要 JavaScript 更新位置
     }
 
     hideBubble() {
@@ -456,7 +443,6 @@ class GameNavigator {
         const rows = 4;
         const fragW = cardW / cols;
         const fragH = cardH / rows;
-        const bg = getComputedStyle(el).background || getComputedStyle(el).backgroundColor;
 
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
@@ -537,7 +523,6 @@ class GameNavigator {
     }
 
     gameLoop() {
-        const mapRect = this.mapElement.getBoundingClientRect();
         const maxX = this.worldWidth - this.currentPlayerSize;
         const TAP_SPEED = 3;
         const CONTINUOUS_ACCEL = 0.4;

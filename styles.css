@@ -5,7 +5,7 @@
     --accent-color: #e94560;
     --text-color: #ffffff;
     --pixel-font: 'Press Start 2P', 'Courier New', monospace;
-    --crt-scanline: rgba(18, 16, 16, 0.1);
+    --player-size: 64px;
 }
 
 * {
@@ -77,24 +77,6 @@ body {
     50% { transform: scale(1.05); }
 }
 
-.instructions {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    font-size: 0.7rem;
-    color: #a0a0a0;
-}
-
-.blink {
-    animation: blink 1s infinite;
-    color: var(--accent-color);
-}
-
-@keyframes blink {
-    0%, 50%, 100% { opacity: 1; }
-    25%, 75% { opacity: 0.3; }
-}
-
 /* ========== 游戏地图 ========== */
 .game-map {
     flex: 1;
@@ -114,10 +96,6 @@ body {
 }
 
 /* ========== 玩家角色 ========== */
-:root {
-    --player-size: 64px;
-}
-
 .player {
     position: absolute;
     width: var(--player-size);
@@ -127,9 +105,6 @@ body {
 }
 
 .player-sprite {
-    font-size: calc(var(--player-size) * 0.66);
-    text-align: center;
-    line-height: var(--player-size);
     animation: bounce 0.6s infinite;
     filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.5));
 }
@@ -295,13 +270,6 @@ body {
     50% { box-shadow: 0 0 40px var(--accent-color); }
 }
 
-.site-card img {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
-    image-rendering: pixelated;
-}
-
 .site-card .site-icon {
     font-size: 48px;
 }
@@ -332,39 +300,20 @@ body {
     :root {
         --player-size: 48px;
     }
-    
+
     .pixel-title {
         font-size: 1.2rem;
     }
-    
-    .instructions {
-        flex-direction: column;
-        gap: 5px;
-        font-size: 0.5rem;
-    }
-    
-    .player {
-        width: 48px;
-        height: 48px;
-    }
-    
-    .player-sprite {
-        font-size: 32px;
-        line-height: 48px;
-    }
-    
+
     .site-card {
         width: 90px;
         height: 90px;
     }
-    
-    .site-card img,
+
     .site-card .site-icon {
-        width: 45px;
-        height: 45px;
         font-size: 36px;
     }
-    
+
     .site-card .site-name {
         font-size: 0.5rem;
     }
