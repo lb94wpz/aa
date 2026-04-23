@@ -7,7 +7,7 @@ const sites = [
         description: "Wii 游戏在线平台，重温经典体感游戏的乐趣",
         icon: "🎮",
         color: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        position: { x: 100, y: 100 },
+        position: { x: 2000, y: 500 },
         size: { width: 120, height: 120 },
         category: "website"
     },

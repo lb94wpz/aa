@@ -49,7 +49,10 @@ class GameNavigator {
         this.bubbleContent = document.getElementById('bubbleContent');
         this.bubbleTimer = null;
         this.helpDialogOpen = false;
-        
+        this.cameraX = 0;
+        this.worldWidth = 0;
+        this.worldElement = null;
+
         // 帮助按钮事件
         this.helpBtn = document.getElementById('helpBtn');
         this.helpDialog = document.getElementById('helpDialog');
@@ -58,7 +61,24 @@ class GameNavigator {
         this.helpBtn.addEventListener('click', () => this.showHelpDialog());
         this.helpCloseBtn.addEventListener('click', () => this.hideHelpDialog());
         this.helpDialog.querySelector('.dialog-overlay').addEventListener('click', () => this.hideHelpDialog());
-        
+
+        // 创建世界容器 - 根据sites数据动态计算地图宽度
+        const maxXFromSites = sites.reduce((max, s) => {
+            const w = s.size ? s.size.width : 120;
+            return Math.max(max, s.position.x + w);
+        }, 0);
+        const initMapRect = this.mapElement.getBoundingClientRect();
+        this.worldWidth = Math.max(initMapRect.width, maxXFromSites + 200);
+
+        this.worldElement = document.createElement('div');
+        this.worldElement.className = 'game-world';
+        this.worldElement.style.width = this.worldWidth + 'px';
+
+        // 将玩家移入世界容器
+        this.player.element.remove();
+        this.worldElement.appendChild(this.player.element);
+        this.mapElement.insertBefore(this.worldElement, this.mapElement.firstChild);
+
         // 初始化网站卡片
         this.createSiteCards();
         
@@ -70,8 +90,7 @@ class GameNavigator {
         document.getElementById('siteCount').textContent = websiteCount;
         
         // 设置玩家初始位置为底部
-        const mapRect = this.mapElement.getBoundingClientRect();
-        this.player.groundY = mapRect.height - this.currentPlayerSize;
+        this.player.groundY = initMapRect.height - this.currentPlayerSize;
         this.player.y = this.player.groundY;
         
         // 启动游戏循环
@@ -107,7 +126,7 @@ class GameNavigator {
                 window.open(site.url, '_blank');
             });
             
-            this.mapElement.appendChild(card);
+            this.worldElement.appendChild(card);
             
             this.siteCards.push({
                 element: card,
@@ -170,12 +189,29 @@ class GameNavigator {
     }
 
     handleResize() {
-        // 确保玩家在地图范围内
+        // 重新计算世界宽度
         const mapRect = this.mapElement.getBoundingClientRect();
-        this.player.x = Math.min(Math.max(this.player.x, 0), mapRect.width - this.currentPlayerSize);
+        const maxXFromSites = sites.reduce((max, s) => {
+            const w = s.size ? s.size.width : 120;
+            return Math.max(max, s.position.x + w);
+        }, 0);
+        this.worldWidth = Math.max(mapRect.width, maxXFromSites + 200);
+        this.worldElement.style.width = this.worldWidth + 'px';
+
+        // 确保玩家在地图范围内
+        this.player.x = Math.min(Math.max(this.player.x, 0), this.worldWidth - this.currentPlayerSize);
         this.player.groundY = Math.min(this.player.groundY, mapRect.height - this.currentPlayerSize);
-        
+
+        this.updateCamera();
         this.updatePlayerPosition();
+    }
+
+    updateCamera() {
+        const mapRect = this.mapElement.getBoundingClientRect();
+        const viewportWidth = mapRect.width;
+        const targetCameraX = this.player.x - viewportWidth / 2 + this.currentPlayerSize / 2;
+        this.cameraX = Math.max(0, Math.min(targetCameraX, this.worldWidth - viewportWidth));
+        this.worldElement.style.transform = `translateX(${-this.cameraX}px)`;
     }
 
     updatePlayerPosition() {
@@ -347,7 +383,7 @@ class GameNavigator {
         if (this.player.y > maxY) {
             this.player.y = maxY;
         }
-        const maxX = mapRect.width - newSize;
+        const maxX = this.worldWidth - newSize;
         if (this.player.x > maxX) {
             this.player.x = maxX;
         }
@@ -411,12 +447,10 @@ class GameNavigator {
 
     breakCard(cardObj) {
         const el = cardObj.element;
-        const rect = el.getBoundingClientRect();
-        const mapRect = this.mapElement.getBoundingClientRect();
-        const cardW = rect.width;
-        const cardH = rect.height;
-        const relX = rect.left - mapRect.left;
-        const relY = rect.top - mapRect.top;
+        const cardW = cardObj.width;
+        const cardH = cardObj.height;
+        const relX = cardObj.x;
+        const relY = cardObj.y;
 
         const cols = 4;
         const rows = 4;
@@ -445,7 +479,7 @@ class GameNavigator {
                 frag.style.animation = `fragmentFly ${0.4 + Math.random() * 0.4}s ease-out forwards`;
                 frag.style.animationDelay = (Math.random() * 0.05) + 's';
 
-                this.mapElement.appendChild(frag);
+                this.worldElement.appendChild(frag);
 
                 setTimeout(() => frag.remove(), 1000);
             }
@@ -504,7 +538,7 @@ class GameNavigator {
 
     gameLoop() {
         const mapRect = this.mapElement.getBoundingClientRect();
-        const maxX = mapRect.width - this.currentPlayerSize;
+        const maxX = this.worldWidth - this.currentPlayerSize;
         const TAP_SPEED = 3;
         const CONTINUOUS_ACCEL = 0.4;
         const CONTINUOUS_MAX = 10;
@@ -574,6 +608,7 @@ class GameNavigator {
         this.player.x = Math.max(0, Math.min(this.player.x, maxX));
 
         this.updatePlayerPosition();
+        this.updateCamera();
         this.checkCollisions();
 
         requestAnimationFrame(() => this.gameLoop());
