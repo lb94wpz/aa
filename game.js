@@ -306,7 +306,11 @@ class GameNavigator {
                 this.shakeCard(hitCardFromBelow.element);
                 this.player.velocityY = 0;
             } else if (category === 'block') {
-                this.shakeCard(hitCardFromBelow.element);
+                if (this.currentPlayerSize >= PLAYER_SIZE_MAX) {
+                    this.breakCard(hitCardFromBelow);
+                } else {
+                    this.shakeCard(hitCardFromBelow.element);
+                }
                 this.player.velocityY = 0;
             } else {
                 this.hitCardFromBelow(hitCardFromBelow.data, hitCardFromBelow.element);
@@ -397,13 +401,67 @@ class GameNavigator {
 
     shakeCard(cardElement) {
         cardElement.style.animation = 'none';
-        cardElement.offsetHeight; // 触发重排
+        cardElement.offsetHeight;
         cardElement.style.animation = 'shake 0.5s ease-in-out';
         
-        // 动画结束后清除
         setTimeout(() => {
             cardElement.style.animation = '';
         }, 500);
+    }
+
+    breakCard(cardObj) {
+        const el = cardObj.element;
+        const rect = el.getBoundingClientRect();
+        const mapRect = this.mapElement.getBoundingClientRect();
+        const cardW = rect.width;
+        const cardH = rect.height;
+        const relX = rect.left - mapRect.left;
+        const relY = rect.top - mapRect.top;
+
+        const cols = 4;
+        const rows = 4;
+        const fragW = cardW / cols;
+        const fragH = cardH / rows;
+        const bg = getComputedStyle(el).background || getComputedStyle(el).backgroundColor;
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const frag = document.createElement('div');
+                frag.className = 'block-fragment';
+                frag.style.width = fragW + 'px';
+                frag.style.height = fragH + 'px';
+                frag.style.left = (relX + c * fragW) + 'px';
+                frag.style.top = (relY + r * fragH) + 'px';
+                frag.style.background = el.style.background || el.style.backgroundColor || '#f5af19';
+                frag.style.backgroundSize = `${cardW}px ${cardH}px`;
+                frag.style.backgroundPosition = `-${c * fragW}px -${r * fragH}px`;
+
+                const fx = (Math.random() - 0.5) * 200;
+                const fy = -(Math.random() * 120 + 30);
+                const fr = (Math.random() - 0.5) * 720;
+                frag.style.setProperty('--fx', fx + 'px');
+                frag.style.setProperty('--fy', fy + 'px');
+                frag.style.setProperty('--fr', fr + 'deg');
+                frag.style.animation = `fragmentFly ${0.4 + Math.random() * 0.4}s ease-out forwards`;
+                frag.style.animationDelay = (Math.random() * 0.05) + 's';
+
+                this.mapElement.appendChild(frag);
+
+                setTimeout(() => frag.remove(), 1000);
+            }
+        }
+
+        el.classList.add('block-break');
+        el.style.pointerEvents = 'none';
+
+        setTimeout(() => {
+            el.style.display = 'none';
+        }, 200);
+
+        const idx = this.siteCards.indexOf(cardObj);
+        if (idx !== -1) {
+            this.siteCards.splice(idx, 1);
+        }
     }
 
     showDialog(site) {
