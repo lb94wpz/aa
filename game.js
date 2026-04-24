@@ -201,6 +201,12 @@ class GameNavigator {
                 <div class="site-name">${site.name}</div>
             `;
 
+            // 透明方块初始隐藏
+            if (site.transparent) {
+                card.style.opacity = '0';
+                card.style.pointerEvents = 'none';
+            }
+
             // 点击访问
             card.addEventListener('click', () => {
                 if (site.category === 'website') {
@@ -218,7 +224,10 @@ class GameNavigator {
                 width: cardWidth,
                 height: cardHeight,
                 // 碰撞框向上扩展的偏移量（管道的 ::before 帽檐向上延伸16px）
-                collisionOffsetTop: site.category === 'pipe' ? 10 : 0
+                collisionOffsetTop: site.category === 'pipe' ? 10 : 0,
+                // 透明方块标记
+                transparent: site.transparent === true,
+                revealed: false
             });
         });
     }
@@ -359,6 +368,30 @@ class GameNavigator {
         let onPlatform = false;
 
         this.siteCards.forEach(card => {
+            // 透明方块未显示时，只检测从下方碰撞
+            if (card.transparent && !card.revealed) {
+                const cardRect = {
+                    x: card.x,
+                    y: card.y - card.collisionOffsetTop,
+                    width: card.width,
+                    height: card.height + card.collisionOffsetTop
+                };
+
+                if (this.isColliding(playerRect, cardRect, 0)) {
+                    const overlapBottom = (cardRect.y + cardRect.height) - playerRect.y;
+                    const overlapTop = (playerRect.y + playerRect.height) - cardRect.y;
+                    const minOverlap = Math.min(overlapBottom, overlapTop);
+
+                    // 只有从下方碰撞才触发
+                    if (minOverlap === overlapBottom && this.player.velocityY < 0) {
+                        hitCardFromBelow = card;
+                        this.player.y = cardRect.y + cardRect.height + 1;
+                        this.player.velocityY = 0;
+                    }
+                }
+                return;
+            }
+
             const offsetTop = card.collisionOffsetTop;
             const cardRect = {
                 x: card.x,
@@ -413,6 +446,12 @@ class GameNavigator {
 
         // 只有从下方碰撞才触发震动和弹窗
         if (hitCardFromBelow) {
+            // 如果是透明方块且未显示，先显示它
+            if (hitCardFromBelow.transparent && !hitCardFromBelow.revealed) {
+                hitCardFromBelow.revealed = true;
+                hitCardFromBelow.element.classList.add('revealed');
+            }
+
             const category = hitCardFromBelow.data.category;
             
             // 先震动

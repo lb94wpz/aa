@@ -490,6 +490,13 @@ body {
     text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
 }
 
+/* ========== 透明方块样式 ========== */
+.site-card.revealed {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
 /* ========== 响应式设计 ========== */
 @media (max-width: 768px) {
     :root {

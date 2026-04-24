@@ -151,6 +151,30 @@ const sites = [
         category: "block"
     },
 
+    // === 隐藏区域：透明方块 ===
+    {
+        name: "隐藏金币",
+        description: "你发现了隐藏奖励！",
+        icon: "💰",
+        color: "linear-gradient(135deg, #f5af19 0%, #f12711 100%)",
+        position: { x: 500, y: 500 },
+        size: { width: 120, height: 120 },
+        category: "coin",
+        coins: 50,
+        transparent: true,
+        mario: "哇！隐藏金币！50枚！"
+    },
+    {
+        name: "隐藏砖块",
+        description: "我是一块隐藏的砖块",
+        icon: "🧱",
+        color: "linear-gradient(135deg, #8B4513 0%, #A0522D 100%)",
+        position: { x: 700, y: 200 },
+        size: { width: 120, height: 120 },
+        category: "block",
+        transparent: true
+    },
+
     // === 第一平台区：初次攀爬 ===
     {
         name: "金币",
