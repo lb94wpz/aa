@@ -174,6 +174,16 @@ const sites = [
         category: "block",
         transparent: true
     },
+    {
+        name: "隐藏管道",
+        description: "隐藏的通道",
+        icon: "",
+        color: "",
+        position: { x: 250, y: 700 },
+        size: { width: 100 },
+        category: "pipe",
+        transparent: true
+    },
 
     // === 第一平台区：初次攀爬 ===
     {
@@ -204,7 +214,9 @@ const sites = [
         color: "",
         position: { x: 935, y: 700 },
         size: { width: 100 },
-        category: "pipe"
+        category: "pipe",
+        transparent: true
+
     },
     {
         name: "变大蘑菇",

@@ -368,7 +368,7 @@ class GameNavigator {
         let onPlatform = false;
 
         this.siteCards.forEach(card => {
-            // 透明方块未显示时，只检测从下方碰撞
+            // 透明方块未显示时的碰撞处理
             if (card.transparent && !card.revealed) {
                 const cardRect = {
                     x: card.x,
@@ -378,11 +378,44 @@ class GameNavigator {
                 };
 
                 if (this.isColliding(playerRect, cardRect, 0)) {
+                    // 管道：保留所有方向碰撞，碰撞后立即显示
+                    if (card.data.category === 'pipe') {
+                        const overlapLeft = (playerRect.x + playerRect.width) - cardRect.x;
+                        const overlapRight = (cardRect.x + cardRect.width) - playerRect.x;
+                        const overlapTop = (playerRect.y + playerRect.height) - cardRect.y;
+                        const overlapBottom = (cardRect.y + cardRect.height) - playerRect.y;
+                        const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+
+                        // 立即显示
+                        card.revealed = true;
+                        card.element.classList.add('revealed');
+
+                        // 根据碰撞方向处理
+                        if (minOverlap === overlapBottom && this.player.velocityY < 0) {
+                            hitCardFromBelow = card;
+                            this.player.y = cardRect.y + cardRect.height + 1;
+                            this.player.velocityY = 0;
+                        } else if (minOverlap === overlapTop && this.player.velocityY >= 0) {
+                            this.player.y = cardRect.y - playerRect.height - 1;
+                            this.player.velocityY = 0;
+                            this.player.jumping = false;
+                            this.player.jumpCount = 0;
+                            onPlatform = true;
+                        } else if (minOverlap === overlapLeft || minOverlap === overlapRight) {
+                            if (overlapLeft < overlapRight) {
+                                this.player.x = cardRect.x - playerRect.width - 1;
+                            } else {
+                                this.player.x = cardRect.x + cardRect.width + 1;
+                            }
+                        }
+                        return;
+                    }
+
+                    // 其他透明方块：只检测从下方碰撞
                     const overlapBottom = (cardRect.y + cardRect.height) - playerRect.y;
                     const overlapTop = (playerRect.y + playerRect.height) - cardRect.y;
                     const minOverlap = Math.min(overlapBottom, overlapTop);
 
-                    // 只有从下方碰撞才触发
                     if (minOverlap === overlapBottom && this.player.velocityY < 0) {
                         hitCardFromBelow = card;
                         this.player.y = cardRect.y + cardRect.height + 1;
