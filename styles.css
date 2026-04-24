@@ -8,6 +8,21 @@
     --text-color: #ffffff;
     --pixel-font: 'Press Start 2P', 'Courier New', monospace;
     --player-size: 64px;
+    --cloud-color: #fff;
+    --hill-color: #4a7c2a;
+    --bush-color: #3cbf3c;
+    --star-opacity: 0;
+}
+
+body.night {
+    --sky-top: #0d1b2a;
+    --sky-bottom: #1b263b;
+    --ground-color: #5a2a04;
+    --ground-dark: #3a1a00;
+    --cloud-color: #2a3a4a;
+    --hill-color: #1a3a1a;
+    --bush-color: #2a6a2a;
+    --star-opacity: 1;
 }
 
 * {
@@ -110,6 +125,33 @@ body {
     height: 100vh;
     background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 60%, #b0e0e6 80%, #dceef5 100%);
     overflow: hidden;
+    transition: background 2s ease;
+}
+
+.game-map::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+        radial-gradient(2px 2px at 40px 70px, #fff, transparent),
+        radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+        radial-gradient(2px 2px at 160px 120px, #fff, transparent),
+        radial-gradient(1px 1px at 230px 80px, #fff, transparent),
+        radial-gradient(2px 2px at 300px 150px, #fff, transparent),
+        radial-gradient(1px 1px at 370px 50px, #fff, transparent),
+        radial-gradient(2px 2px at 450px 100px, #fff, transparent),
+        radial-gradient(1px 1px at 520px 180px, #fff, transparent),
+        radial-gradient(2px 2px at 600px 60px, #fff, transparent);
+    background-size: 650px 200px;
+    background-repeat: repeat;
+    opacity: var(--star-opacity);
+    transition: opacity 2s ease;
+    pointer-events: none;
+    z-index: 0;
 }
 
 .game-world {
@@ -128,11 +170,12 @@ body {
     position: absolute;
     width: var(--cloud-w);
     height: var(--cloud-h);
-    background: #fff;
+    background: var(--cloud-color);
     border-radius: var(--cloud-h);
     z-index: 1;
     pointer-events: none;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: background 2s ease;
 }
 .bg-cloud::before {
     content: '';
@@ -141,8 +184,9 @@ body {
     left: calc(var(--cloud-w) * 0.175);
     width: calc(var(--cloud-h) * 0.83);
     height: calc(var(--cloud-h) * 0.83);
-    background: #fff;
+    background: var(--cloud-color);
     border-radius: 50%;
+    transition: background 2s ease;
 }
 .bg-cloud::after {
     content: '';
@@ -151,8 +195,9 @@ body {
     left: calc(var(--cloud-w) * 0.475);
     width: calc(var(--cloud-h) * 0.61);
     height: calc(var(--cloud-h) * 0.61);
-    background: #fff;
+    background: var(--cloud-color);
     border-radius: 50%;
+    transition: background 2s ease;
 }
 
 /* 山丘 */
@@ -161,6 +206,7 @@ body {
     border-radius: 50% 50% 0 0;
     z-index: 1;
     pointer-events: none;
+    transition: background 2s ease;
 }
 
 /* 灌木 */
@@ -170,10 +216,11 @@ body {
     position: absolute;
     width: var(--bush-w);
     height: var(--bush-h);
-    background: #3cbf3c;
+    background: var(--bush-color);
     border-radius: var(--bush-h) var(--bush-h) 0 0;
     z-index: 2;
     pointer-events: none;
+    transition: background 2s ease;
 }
 .bg-bush::before {
     content: '';
@@ -182,8 +229,9 @@ body {
     left: calc(var(--bush-w) * 0.17);
     width: calc(var(--bush-h) * 0.83);
     height: calc(var(--bush-h) * 0.83);
-    background: #3cbf3c;
+    background: var(--bush-color);
     border-radius: 50%;
+    transition: background 2s ease;
 }
 .bg-bush::after {
     content: '';
@@ -192,8 +240,9 @@ body {
     left: calc(var(--bush-w) * 0.5);
     width: calc(var(--bush-h) * 0.67);
     height: calc(var(--bush-h) * 0.67);
-    background: #3cbf3c;
+    background: var(--bush-color);
     border-radius: 50%;
+    transition: background 2s ease;
 }
 
 /* 地面 - 砖块纹理 */

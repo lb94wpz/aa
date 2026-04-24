@@ -101,6 +101,31 @@ class GameNavigator {
         
         // 初始定位
         this.handleResize();
+        
+        // 初始化日夜循环
+        this.initDayNightCycle();
+    }
+
+    initDayNightCycle() {
+        // 根据当前时间设置初始主题
+        this.updateDayNightTheme();
+        
+        // 每分钟检查一次是否需要切换主题
+        setInterval(() => this.updateDayNightTheme(), 60000);
+    }
+
+    updateDayNightTheme() {
+        const now = new Date();
+        const hours = now.getHours();
+        
+        // 6 点到 18 点为白天，18 点到次日 6 点为黑夜
+        const isNight = hours < 6 || hours >= 18;
+        
+        if (isNight) {
+            document.body.classList.add('night');
+        } else {
+            document.body.classList.remove('night');
+        }
     }
 
     createSiteCards() {
