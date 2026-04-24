@@ -7,18 +7,24 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="crt-overlay"></div>
-    
     <div class="game-container">
-        <header class="game-header">
-            <h1 class="pixel-title">🎮 游戏导航站</h1>
-            <div class="coin-counter" id="coinCounter">💰 <span id="coinCount">0</span></div>
-        </header>
-        
+        <!-- 浮动 HUD -->
+        <div class="game-hud">
+            <div class="hud-title">🎮 游戏导航站</div>
+            <div class="coin-counter" id="coinCounter">💰×<span id="coinCount">0</span></div>
+            <div class="hud-stats">网站 <span id="siteCount">0</span></div>
+        </div>
+
         <!-- 帮助按钮 - 右上角书本图标 -->
         <button class="help-btn" id="helpBtn" title="操作指南">📖</button>
 
         <div class="game-map" id="gameMap">
+            <!-- 云朵 - 远景视差，固定在视口 -->
+            <div class="bg-cloud" style="top:8%;left:6%"></div>
+            <div class="bg-cloud bg-cloud-lg" style="top:16%;left:35%"></div>
+            <div class="bg-cloud" style="top:6%;left:62%"></div>
+            <div class="bg-cloud bg-cloud-lg" style="top:20%;left:84%"></div>
+
             <!-- 玩家角色 -->
             <div class="player" id="player">
                 <div class="player-shadow"></div>
@@ -87,12 +93,6 @@
                 </div>
             </div>
         </div>
-
-        <footer class="game-footer">
-            <div class="stats">
-                <span>网站数量：<span id="siteCount">0</span></span>
-            </div>
-        </footer>
     </div>
 
     <script src="sites.js"></script>

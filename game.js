@@ -3,6 +3,7 @@ const PLAYER_SIZE = 64;
 const PLAYER_SIZE_STEP = 8;
 const PLAYER_SIZE_MIN = 32;
 const PLAYER_SIZE_MAX = 96;
+const GROUND_HEIGHT = 48;
 
 class GameNavigator {
     constructor() {
@@ -70,6 +71,9 @@ class GameNavigator {
         this.worldElement.className = 'game-world';
         this.worldElement.style.width = this.worldWidth + 'px';
 
+        // 创建地面、山丘、灌木 - 随世界滚动
+        this.createGroundDecor(initMapRect.height);
+
         // 将玩家移入世界容器
         this.player.element.remove();
         this.worldElement.appendChild(this.player.element);
@@ -85,8 +89,8 @@ class GameNavigator {
         const websiteCount = sites.filter(s => s.category === 'website').length;
         document.getElementById('siteCount').textContent = websiteCount;
         
-        // 设置玩家初始位置为底部
-        this.player.groundY = initMapRect.height - this.currentPlayerSize;
+        // 设置玩家初始位置为地面上方
+        this.player.groundY = initMapRect.height - GROUND_HEIGHT - this.currentPlayerSize;
         this.player.y = this.player.groundY;
         
         // 启动游戏循环
@@ -113,7 +117,7 @@ class GameNavigator {
 
             const cardWidth = site.size ? site.size.width : 120;
             const cardHeight = site.category === 'pipe'
-                ? mapHeight - site.position.y
+                ? mapHeight - GROUND_HEIGHT - site.position.y
                 : (site.size ? site.size.height : 120);
             card.style.width = cardWidth + 'px';
             card.style.height = cardHeight + 'px';
@@ -143,6 +147,43 @@ class GameNavigator {
                 // 碰撞框向上扩展的偏移量（管道的 ::before 帽檐向上延伸16px）
                 collisionOffsetTop: site.category === 'pipe' ? 10 : 0
             });
+        });
+    }
+
+    createGroundDecor(mapHeight) {
+        // 地面 - 铺满世界宽度
+        const ground = document.createElement('div');
+        ground.className = 'bg-ground';
+        this.worldElement.appendChild(ground);
+
+        // 山丘
+        const hills = [
+            { left: '2%', width: 200, height: 80, cls: 'bg-hill-far' },
+            { left: '20%', width: 140, height: 55, cls: 'bg-hill-near' },
+            { left: '42%', width: 180, height: 70, cls: 'bg-hill-far' },
+            { left: '68%', width: 120, height: 48, cls: 'bg-hill-near' },
+            { left: '82%', width: 160, height: 65, cls: 'bg-hill-far' }
+        ];
+        hills.forEach(h => {
+            const el = document.createElement('div');
+            el.className = 'bg-hill ' + h.cls;
+            el.style.left = h.left;
+            el.style.width = h.width + 'px';
+            el.style.height = h.height + 'px';
+            this.worldElement.appendChild(el);
+        });
+
+        // 灌木
+        const bushes = [
+            { left: '12%', cls: '' },
+            { left: '50%', cls: 'bg-bush-lg' },
+            { left: '88%', cls: '' }
+        ];
+        bushes.forEach(b => {
+            const el = document.createElement('div');
+            el.className = 'bg-bush ' + b.cls;
+            el.style.left = b.left;
+            this.worldElement.appendChild(el);
         });
     }
 
@@ -208,14 +249,14 @@ class GameNavigator {
         // 更新管道高度
         this.siteCards.forEach(card => {
             if (card.data.category === 'pipe') {
-                card.height = mapRect.height - card.y;
+                card.height = mapRect.height - GROUND_HEIGHT - card.y;
                 card.element.style.height = card.height + 'px';
             }
         });
 
         // 确保玩家在地图范围内
         this.player.x = Math.min(Math.max(this.player.x, 0), this.worldWidth - this.currentPlayerSize);
-        this.player.groundY = Math.min(this.player.groundY, mapRect.height - this.currentPlayerSize);
+        this.player.groundY = Math.min(this.player.groundY, mapRect.height - GROUND_HEIGHT - this.currentPlayerSize);
 
         this.updateCamera();
         this.updatePlayerPosition();
@@ -398,7 +439,7 @@ class GameNavigator {
 
         // 调整玩家位置，防止变大时卡进地面
         const mapRect = this.mapElement.getBoundingClientRect();
-        const maxY = mapRect.height - newSize;
+        const maxY = mapRect.height - GROUND_HEIGHT - newSize;
         if (this.player.y > maxY) {
             this.player.y = maxY;
         }
@@ -408,7 +449,7 @@ class GameNavigator {
         }
 
         // 更新地面位置
-        this.player.groundY = mapRect.height - newSize;
+        this.player.groundY = mapRect.height - GROUND_HEIGHT - newSize;
     }
 
     showBubble(text) {

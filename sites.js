@@ -59,7 +59,7 @@ const sites = [
         description: "跳上去才能通过！",
         icon: "",
         color: "",
-        position: { x: 935, y: 400 },
+        position: { x: 935, y: 700 },
         size: { width: 100 },
         category: "pipe"
     },
@@ -122,7 +122,7 @@ const sites = [
         description: "跳上去才能通过！",
         icon: "",
         color: "",
-        position: { x: 1785, y: 400 },
+        position: { x: 1785, y: 600 },
         size: { width: 100 },
         category: "pipe"
     },
