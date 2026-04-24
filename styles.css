@@ -486,14 +486,9 @@ body {
 }
 
 .site-card.active {
-    animation: cardGlow 1s infinite;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 30px var(--accent-color);
-}
-
-@keyframes cardGlow {
-    0%, 100% { box-shadow: 0 0 20px var(--accent-color); }
-    50% { box-shadow: 0 0 40px var(--accent-color); }
+    animation: none;
+    border-color: #fff;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
 .site-card .site-icon {

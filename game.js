@@ -371,10 +371,6 @@ class GameNavigator {
 
             // 检测基础碰撞（不使用 padding，精确检测）
             if (this.isColliding(playerRect, cardRect, 0)) {
-                hasAnyCollision = true;
-                card.element.classList.add('active');
-                collidedCards.push(card);
-                
                 // 计算碰撞重叠区域
                 const overlapLeft = (playerRect.x + playerRect.width) - cardRect.x;
                 const overlapRight = (cardRect.x + cardRect.width) - playerRect.x;
@@ -387,12 +383,18 @@ class GameNavigator {
                 // 从下方碰撞：玩家向上移动，顶部撞到卡片底部
                 if (minOverlap === overlapBottom && this.player.velocityY < 0) {
                     hitCardFromBelow = card;
+                    card.element.classList.add('active');
+                    collidedCards.push(card);
+                    hasAnyCollision = true;
                     // 将玩家推出到卡片下方
                     this.player.y = cardRect.y + cardRect.height + 1;
                     this.player.velocityY = 0;
                 }
                 // 从上方碰撞：玩家向下移动，底部撞到卡片顶部
                 else if (minOverlap === overlapTop && this.player.velocityY >= 0) {
+                    card.element.classList.add('active');
+                    collidedCards.push(card);
+                    hasAnyCollision = true;
                     // 将玩家推出到卡片上方
                     this.player.y = cardRect.y - playerRect.height - 1;
                     this.player.velocityY = 0;
@@ -400,7 +402,7 @@ class GameNavigator {
                     this.player.jumpCount = 0;
                     onPlatform = true;
                 }
-                // 侧边碰撞
+                // 侧边碰撞：不添加 active 类，不触发震动
                 else if (minOverlap === overlapLeft || minOverlap === overlapRight) {
                     // 从左边碰撞：将玩家推出到卡片左侧
                     if (overlapLeft < overlapRight) {
@@ -409,10 +411,6 @@ class GameNavigator {
                     // 从右边碰撞：将玩家推出到卡片右侧
                     else {
                         this.player.x = cardRect.x + cardRect.width + 1;
-                    }
-                    // 管道只阻止位移，不清零速度（保持奔跑姿势）
-                    if (card.data.category !== 'pipe') {
-                        this.player.velocityX = 0;
                     }
                 }
             } else {
@@ -423,23 +421,19 @@ class GameNavigator {
         // 更新 onPlatform 状态
         this.player.onPlatform = onPlatform;
 
-        // 任何接触都触发震动（管道除外）
-        if (hasAnyCollision && collidedCards.length > 0) {
-            const shakeTarget = collidedCards.find(c => c.data.category !== 'pipe');
-            if (shakeTarget) this.shakeCard(shakeTarget.element);
-        }
-
-        // 只有从下方碰撞才弹窗（仅对 website 类型）
+        // 只有从下方碰撞才触发震动和弹窗
         if (hitCardFromBelow) {
             const category = hitCardFromBelow.data.category;
             
+            // 先震动
+            this.shakeCard(hitCardFromBelow.element);
+            
+            // 再处理其他逻辑
             if (category === 'grow') {
                 this.changePlayerSize(PLAYER_SIZE_STEP);
-                this.shakeCard(hitCardFromBelow.element);
                 this.player.velocityY = 0;
             } else if (category === 'shrink') {
                 this.changePlayerSize(-PLAYER_SIZE_STEP);
-                this.shakeCard(hitCardFromBelow.element);
                 this.player.velocityY = 0;
             } else if (category === 'coin') {
                 this.collectCoin(hitCardFromBelow);
@@ -449,8 +443,6 @@ class GameNavigator {
             } else if (category === 'block') {
                 if (this.currentPlayerSize >= PLAYER_SIZE_MAX) {
                     this.breakCard(hitCardFromBelow);
-                } else {
-                    this.shakeCard(hitCardFromBelow.element);
                 }
                 this.player.velocityY = 0;
             } else {
