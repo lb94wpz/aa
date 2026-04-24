@@ -174,50 +174,35 @@ body {
 
 /* 灌木 */
 .bg-bush {
+    --bush-w: 60px;
+    --bush-h: 24px;
     position: absolute;
-    bottom: 48px;
-    width: 60px;
-    height: 24px;
+    width: var(--bush-w);
+    height: var(--bush-h);
     background: #3cbf3c;
-    border-radius: 24px 24px 0 0;
+    border-radius: var(--bush-h) var(--bush-h) 0 0;
     z-index: 3;
     pointer-events: none;
 }
 .bg-bush::before {
     content: '';
     position: absolute;
-    top: -10px;
-    left: 10px;
-    width: 20px;
-    height: 20px;
+    top: calc(var(--bush-h) * -0.42);
+    left: calc(var(--bush-w) * 0.17);
+    width: calc(var(--bush-h) * 0.83);
+    height: calc(var(--bush-h) * 0.83);
     background: #3cbf3c;
     border-radius: 50%;
 }
 .bg-bush::after {
     content: '';
     position: absolute;
-    top: -6px;
-    left: 30px;
-    width: 16px;
-    height: 16px;
+    top: calc(var(--bush-h) * -0.25);
+    left: calc(var(--bush-w) * 0.5);
+    width: calc(var(--bush-h) * 0.67);
+    height: calc(var(--bush-h) * 0.67);
     background: #3cbf3c;
     border-radius: 50%;
-}
-.bg-bush-lg {
-    width: 90px;
-    height: 30px;
-}
-.bg-bush-lg::before {
-    top: -14px;
-    left: 14px;
-    width: 28px;
-    height: 28px;
-}
-.bg-bush-lg::after {
-    top: -8px;
-    left: 44px;
-    width: 22px;
-    height: 22px;
 }
 
 /* 地面 - 砖块纹理 */

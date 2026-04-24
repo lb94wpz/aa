@@ -121,6 +121,22 @@ class GameNavigator {
                 return; // 不加入 siteCards，跳过碰撞
             }
 
+            // 灌木：背景装饰，不参与碰撞
+            if (site.category === 'bush') {
+                const bush = document.createElement('div');
+                bush.className = 'bg-bush';
+                const w = site.size ? site.size.width : 60;
+                const h = site.size ? site.size.height : 24;
+                bush.style.setProperty('--bush-w', w + 'px');
+                bush.style.setProperty('--bush-h', h + 'px');
+                bush.style.left = site.position.x + 'px';
+                // 未指定 y 时自动贴地
+                const y = site.position.y != null ? site.position.y : (mapHeight - GROUND_HEIGHT - h);
+                bush.style.top = y + 'px';
+                this.worldElement.appendChild(bush);
+                return;
+            }
+
             const card = document.createElement('div');
             card.className = 'site-card ' + site.category;
             if (site.category !== 'pipe') {
@@ -184,19 +200,6 @@ class GameNavigator {
             el.style.left = h.left;
             el.style.width = h.width + 'px';
             el.style.height = h.height + 'px';
-            this.worldElement.appendChild(el);
-        });
-
-        // 灌木
-        const bushes = [
-            { left: '12%', cls: '' },
-            { left: '50%', cls: 'bg-bush-lg' },
-            { left: '88%', cls: '' }
-        ];
-        bushes.forEach(b => {
-            const el = document.createElement('div');
-            el.className = 'bg-bush ' + b.cls;
-            el.style.left = b.left;
             this.worldElement.appendChild(el);
         });
     }

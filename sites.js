@@ -38,6 +38,35 @@ const sites = [
         category: "cloud"
     },
 
+    // === 灌木：背景装饰，不参与碰撞 ===
+    {
+        name: "灌木",
+        description: "背景装饰",
+        icon: "",
+        color: "",
+        position: { x: 300 },
+        size: { width: 60, height: 24 },
+        category: "bush"
+    },
+    {
+        name: "灌木",
+        description: "背景装饰",
+        icon: "",
+        color: "",
+        position: { x: 1300 },
+        size: { width: 90, height: 30 },
+        category: "bush"
+    },
+    {
+        name: "灌木",
+        description: "背景装饰",
+        icon: "",
+        color: "",
+        position: { x: 2300 },
+        size: { width: 60, height: 24 },
+        category: "bush"
+    },
+
     // === 起步区：教学区域 ===
     {
         name: "金币",
