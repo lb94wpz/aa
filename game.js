@@ -385,8 +385,10 @@ class GameNavigator {
                     else {
                         this.player.x = cardRect.x + cardRect.width + 1;
                     }
-                    // 停止水平移动
-                    this.player.velocityX = 0;
+                    // 管道只阻止位移，不清零速度（保持奔跑姿势）
+                    if (card.data.category !== 'pipe') {
+                        this.player.velocityX = 0;
+                    }
                 }
             } else {
                 card.element.classList.remove('active');
@@ -396,10 +398,10 @@ class GameNavigator {
         // 更新 onPlatform 状态
         this.player.onPlatform = onPlatform;
 
-        // 任何接触都触发震动
+        // 任何接触都触发震动（管道除外）
         if (hasAnyCollision && collidedCards.length > 0) {
-            // 触发第一个碰撞卡片的震动
-            this.shakeCard(collidedCards[0].element);
+            const shakeTarget = collidedCards.find(c => c.data.category !== 'pipe');
+            if (shakeTarget) this.shakeCard(shakeTarget.element);
         }
 
         // 只有从下方碰撞才弹窗（仅对 website 类型）
