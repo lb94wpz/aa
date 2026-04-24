@@ -479,18 +479,6 @@ body {
     border-color: #0a4a0a;
 }
 
-.site-card.pipe.active {
-    animation: none;
-    border-color: #0a4a0a;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-}
-
-.site-card.active {
-    animation: none;
-    border-color: #fff;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-}
-
 .site-card .site-icon {
     font-size: 48px;
 }

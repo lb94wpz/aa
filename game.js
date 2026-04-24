@@ -356,8 +356,6 @@ class GameNavigator {
         };
 
         let hitCardFromBelow = null;
-        let hasAnyCollision = false;
-        let collidedCards = [];
         let onPlatform = false;
 
         this.siteCards.forEach(card => {
@@ -383,18 +381,12 @@ class GameNavigator {
                 // 从下方碰撞：玩家向上移动，顶部撞到卡片底部
                 if (minOverlap === overlapBottom && this.player.velocityY < 0) {
                     hitCardFromBelow = card;
-                    card.element.classList.add('active');
-                    collidedCards.push(card);
-                    hasAnyCollision = true;
                     // 将玩家推出到卡片下方
                     this.player.y = cardRect.y + cardRect.height + 1;
                     this.player.velocityY = 0;
                 }
                 // 从上方碰撞：玩家向下移动，底部撞到卡片顶部
                 else if (minOverlap === overlapTop && this.player.velocityY >= 0) {
-                    card.element.classList.add('active');
-                    collidedCards.push(card);
-                    hasAnyCollision = true;
                     // 将玩家推出到卡片上方
                     this.player.y = cardRect.y - playerRect.height - 1;
                     this.player.velocityY = 0;
@@ -413,8 +405,6 @@ class GameNavigator {
                         this.player.x = cardRect.x + cardRect.width + 1;
                     }
                 }
-            } else {
-                card.element.classList.remove('active');
             }
         });
 
