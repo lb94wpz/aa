@@ -117,7 +117,7 @@ body {
     top: 0;
     left: 0;
     height: 100%;
-    z-index: 10;
+    z-index: 1;
 }
 
 /* ========== 超级玛丽背景装饰 ========== */
@@ -159,7 +159,7 @@ body {
 .bg-hill {
     position: absolute;
     border-radius: 50% 50% 0 0;
-    z-index: 2;
+    z-index: 1;
     pointer-events: none;
 }
 
@@ -172,7 +172,7 @@ body {
     height: var(--bush-h);
     background: #3cbf3c;
     border-radius: var(--bush-h) var(--bush-h) 0 0;
-    z-index: 3;
+    z-index: 2;
     pointer-events: none;
 }
 .bg-bush::before {
@@ -203,7 +203,7 @@ body {
     left: 0;
     right: 0;
     height: 48px;
-    z-index: 4;
+    z-index: 3;
     pointer-events: none;
     background:
         repeating-linear-gradient(
@@ -239,7 +239,7 @@ body {
     width: var(--player-size);
     height: var(--player-size);
     transition: all 0.15s ease-out;
-    z-index: 100;
+    z-index: 4;
 }
 
 .player-sprite {
@@ -389,6 +389,7 @@ body {
     align-items: center;
     justify-content: center;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    z-index: 4;
 }
 
 .site-card:hover {
@@ -403,7 +404,6 @@ body {
     border-color: #0a4a0a;
     border-radius: 0;
     cursor: default;
-    z-index: 50;
 }
 
 .site-card.pipe::before {
@@ -635,7 +635,7 @@ body {
 .block-fragment {
     position: absolute;
     pointer-events: none;
-    z-index: 1000;
+    z-index: 5;
     border-radius: 3px;
 }
 
@@ -653,7 +653,7 @@ body {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
-    z-index: 200;
+    z-index: 5;
     pointer-events: none;
     min-width: 140px;
     max-width: 360px;
