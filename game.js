@@ -107,6 +107,20 @@ class GameNavigator {
         const mapHeight = this.mapElement.getBoundingClientRect().height;
 
         sites.forEach((site) => {
+            // 云朵：背景装饰，不参与碰撞
+            if (site.category === 'cloud') {
+                const cloud = document.createElement('div');
+                cloud.className = 'bg-cloud';
+                const w = site.size ? site.size.width : 80;
+                const h = site.size ? site.size.height : 36;
+                cloud.style.setProperty('--cloud-w', w + 'px');
+                cloud.style.setProperty('--cloud-h', h + 'px');
+                cloud.style.left = site.position.x + 'px';
+                cloud.style.top = site.position.y + 'px';
+                this.worldElement.appendChild(cloud);
+                return; // 不加入 siteCards，跳过碰撞
+            }
+
             const card = document.createElement('div');
             card.className = 'site-card ' + site.category;
             if (site.category !== 'pipe') {

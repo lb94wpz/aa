@@ -123,11 +123,13 @@ body {
 /* ========== 超级玛丽背景装饰 ========== */
 /* 云朵 */
 .bg-cloud {
+    --cloud-w: 80px;
+    --cloud-h: 36px;
     position: absolute;
-    width: 80px;
-    height: 36px;
+    width: var(--cloud-w);
+    height: var(--cloud-h);
     background: #fff;
-    border-radius: 36px;
+    border-radius: var(--cloud-h);
     z-index: 1;
     pointer-events: none;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -135,38 +137,22 @@ body {
 .bg-cloud::before {
     content: '';
     position: absolute;
-    top: -14px;
-    left: 14px;
-    width: 30px;
-    height: 30px;
+    top: calc(var(--cloud-h) * -0.39);
+    left: calc(var(--cloud-w) * 0.175);
+    width: calc(var(--cloud-h) * 0.83);
+    height: calc(var(--cloud-h) * 0.83);
     background: #fff;
     border-radius: 50%;
 }
 .bg-cloud::after {
     content: '';
     position: absolute;
-    top: -8px;
-    left: 38px;
-    width: 22px;
-    height: 22px;
+    top: calc(var(--cloud-h) * -0.22);
+    left: calc(var(--cloud-w) * 0.475);
+    width: calc(var(--cloud-h) * 0.61);
+    height: calc(var(--cloud-h) * 0.61);
     background: #fff;
     border-radius: 50%;
-}
-.bg-cloud-lg {
-    width: 110px;
-    height: 44px;
-}
-.bg-cloud-lg::before {
-    top: -18px;
-    left: 18px;
-    width: 40px;
-    height: 40px;
-}
-.bg-cloud-lg::after {
-    top: -12px;
-    left: 50px;
-    width: 30px;
-    height: 30px;
 }
 
 /* 山丘 */

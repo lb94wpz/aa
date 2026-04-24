@@ -1,5 +1,43 @@
 // 网站配置数据 - 易于扩展
 const sites = [
+    // === 云朵：背景装饰，不参与碰撞 ===
+    {
+        name: "云朵",
+        description: "背景装饰",
+        icon: "",
+        color: "",
+        position: { x: 60, y: 60 },
+        size: { width: 80, height: 36 },
+        category: "cloud"
+    },
+    {
+        name: "云朵",
+        description: "背景装饰",
+        icon: "",
+        color: "",
+        position: { x: 700, y: 110 },
+        size: { width: 110, height: 44 },
+        category: "cloud"
+    },
+    {
+        name: "云朵",
+        description: "背景装饰",
+        icon: "",
+        color: "",
+        position: { x: 1400, y: 50 },
+        size: { width: 80, height: 36 },
+        category: "cloud"
+    },
+    {
+        name: "云朵",
+        description: "背景装饰",
+        icon: "",
+        color: "",
+        position: { x: 2000, y: 140 },
+        size: { width: 110, height: 44 },
+        category: "cloud"
+    },
+
     // === 起步区：教学区域 ===
     {
         name: "金币",
