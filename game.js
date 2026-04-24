@@ -223,8 +223,10 @@ class GameNavigator {
                 y: site.position.y,
                 width: cardWidth,
                 height: cardHeight,
-                // 碰撞框向上扩展的偏移量（管道的 ::before 帽檐向上延伸16px）
+                // 碰撞框向上扩展的偏移量（管道的 ::before 帽檐向上延伸16px，左右各延伸16px）
                 collisionOffsetTop: site.category === 'pipe' ? 10 : 0,
+                collisionOffsetLeft: site.category === 'pipe' ? 16 : 0,
+                collisionOffsetRight: site.category === 'pipe' ? 16 : 0,
                 // 透明方块标记
                 transparent: site.transparent === true,
                 revealed: false
@@ -371,41 +373,99 @@ class GameNavigator {
             // 透明方块未显示时的碰撞处理
             if (card.transparent && !card.revealed) {
                 const cardRect = {
-                    x: card.x,
+                    x: card.x - (card.collisionOffsetLeft || 0),
                     y: card.y - card.collisionOffsetTop,
-                    width: card.width,
+                    width: card.width + (card.collisionOffsetLeft || 0) + (card.collisionOffsetRight || 0),
                     height: card.height + card.collisionOffsetTop
                 };
 
                 if (this.isColliding(playerRect, cardRect, 0)) {
-                    // 管道：保留所有方向碰撞，碰撞后立即显示
+                    // 管道：分段碰撞检测，碰撞后立即显示
                     if (card.data.category === 'pipe') {
-                        const overlapLeft = (playerRect.x + playerRect.width) - cardRect.x;
-                        const overlapRight = (cardRect.x + cardRect.width) - playerRect.x;
-                        const overlapTop = (playerRect.y + playerRect.height) - cardRect.y;
-                        const overlapBottom = (cardRect.y + cardRect.height) - playerRect.y;
-                        const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+                        const hatHeight = 32;
+                        const hatLeft = card.x - 16;
+                        const hatRight = card.x + card.width + 16;
+                        const hatTop = card.y - 16;
+                        const hatBottom = card.y + hatHeight - 16;
+                        
+                        const bodyLeft = card.x;
+                        const bodyRight = card.x + card.width;
+                        const bodyTop = hatBottom;
+                        const bodyBottom = card.y + card.height;
 
-                        // 立即显示
-                        card.revealed = true;
-                        card.element.classList.add('revealed');
+                        const hatRect = { x: hatLeft, y: hatTop, width: hatRight - hatLeft, height: hatBottom - hatTop };
+                        const bodyRect = { x: bodyLeft, y: bodyTop, width: bodyRight - bodyLeft, height: bodyBottom - bodyTop };
 
-                        // 根据碰撞方向处理
-                        if (minOverlap === overlapBottom && this.player.velocityY < 0) {
-                            hitCardFromBelow = card;
-                            this.player.y = cardRect.y + cardRect.height + 1;
-                            this.player.velocityY = 0;
-                        } else if (minOverlap === overlapTop && this.player.velocityY >= 0) {
-                            this.player.y = cardRect.y - playerRect.height - 1;
-                            this.player.velocityY = 0;
-                            this.player.jumping = false;
-                            this.player.jumpCount = 0;
-                            onPlatform = true;
-                        } else if (minOverlap === overlapLeft || minOverlap === overlapRight) {
-                            if (overlapLeft < overlapRight) {
-                                this.player.x = cardRect.x - playerRect.width - 1;
+                        const hitHat = this.isColliding(playerRect, hatRect, 0);
+                        const hitBody = this.isColliding(playerRect, bodyRect, 0);
+
+                        if (hitHat || hitBody) {
+                            // 立即显示
+                            card.revealed = true;
+                            card.element.classList.add('revealed');
+
+                            let useRect, overlapLeft, overlapRight, overlapTop, overlapBottom, minOverlap;
+
+                            if (hitHat && hitBody) {
+                                const hatOverlapLeft = (playerRect.x + playerRect.width) - hatRect.x;
+                                const hatOverlapRight = (hatRect.x + hatRect.width) - playerRect.x;
+                                const hatOverlapTop = (playerRect.y + playerRect.height) - hatRect.y;
+                                const hatOverlapBottom = (hatRect.y + hatRect.height) - playerRect.y;
+                                const hatMin = Math.min(hatOverlapLeft, hatOverlapRight, hatOverlapTop, hatOverlapBottom);
+
+                                const bodyOverlapLeft = (playerRect.x + playerRect.width) - bodyRect.x;
+                                const bodyOverlapRight = (bodyRect.x + bodyRect.width) - playerRect.x;
+                                const bodyOverlapTop = (playerRect.y + playerRect.height) - bodyRect.y;
+                                const bodyOverlapBottom = (bodyRect.y + bodyRect.height) - playerRect.y;
+                                const bodyMin = Math.min(bodyOverlapLeft, bodyOverlapRight, bodyOverlapTop, bodyOverlapBottom);
+
+                                if (hatMin <= bodyMin) {
+                                    useRect = hatRect;
+                                    overlapLeft = hatOverlapLeft;
+                                    overlapRight = hatOverlapRight;
+                                    overlapTop = hatOverlapTop;
+                                    overlapBottom = hatOverlapBottom;
+                                    minOverlap = hatMin;
+                                } else {
+                                    useRect = bodyRect;
+                                    overlapLeft = bodyOverlapLeft;
+                                    overlapRight = bodyOverlapRight;
+                                    overlapTop = bodyOverlapTop;
+                                    overlapBottom = bodyOverlapBottom;
+                                    minOverlap = bodyMin;
+                                }
+                            } else if (hitHat) {
+                                useRect = hatRect;
+                                overlapLeft = (playerRect.x + playerRect.width) - hatRect.x;
+                                overlapRight = (hatRect.x + hatRect.width) - playerRect.x;
+                                overlapTop = (playerRect.y + playerRect.height) - hatRect.y;
+                                overlapBottom = (hatRect.y + hatRect.height) - playerRect.y;
+                                minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
                             } else {
-                                this.player.x = cardRect.x + cardRect.width + 1;
+                                useRect = bodyRect;
+                                overlapLeft = (playerRect.x + playerRect.width) - bodyRect.x;
+                                overlapRight = (bodyRect.x + bodyRect.width) - playerRect.x;
+                                overlapTop = (playerRect.y + playerRect.height) - bodyRect.y;
+                                overlapBottom = (bodyRect.y + bodyRect.height) - playerRect.y;
+                                minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+                            }
+
+                            if (minOverlap === overlapBottom && this.player.velocityY < 0) {
+                                hitCardFromBelow = card;
+                                this.player.y = useRect.y + useRect.height + 1;
+                                this.player.velocityY = 0;
+                            } else if (minOverlap === overlapTop && this.player.velocityY >= 0) {
+                                this.player.y = useRect.y - playerRect.height - 1;
+                                this.player.velocityY = 0;
+                                this.player.jumping = false;
+                                this.player.jumpCount = 0;
+                                onPlatform = true;
+                            } else if (minOverlap === overlapLeft || minOverlap === overlapRight) {
+                                if (overlapLeft < overlapRight) {
+                                    this.player.x = useRect.x - playerRect.width - 1;
+                                } else {
+                                    this.player.x = useRect.x + useRect.width + 1;
+                                }
                             }
                         }
                         return;
@@ -425,11 +485,105 @@ class GameNavigator {
                 return;
             }
 
+            // 管道：分段碰撞检测（顶部帽檐宽，主体窄）
+            if (card.data.category === 'pipe') {
+                const hatHeight = 32;
+                const hatLeft = card.x - 16;
+                const hatRight = card.x + card.width + 16;
+                const hatTop = card.y - 16;
+                const hatBottom = card.y + hatHeight - 16;
+                
+                const bodyLeft = card.x;
+                const bodyRight = card.x + card.width;
+                const bodyTop = hatBottom;
+                const bodyBottom = card.y + card.height;
+
+                // 检测帽檐碰撞
+                const hatRect = { x: hatLeft, y: hatTop, width: hatRight - hatLeft, height: hatBottom - hatTop };
+                // 检测主体碰撞
+                const bodyRect = { x: bodyLeft, y: bodyTop, width: bodyRight - bodyLeft, height: bodyBottom - bodyTop };
+
+                const hitHat = this.isColliding(playerRect, hatRect, 0);
+                const hitBody = this.isColliding(playerRect, bodyRect, 0);
+
+                if (hitHat || hitBody) {
+                    // 计算碰撞重叠
+                    let useRect, overlapLeft, overlapRight, overlapTop, overlapBottom, minOverlap;
+
+                    if (hitHat && hitBody) {
+                        // 同时碰撞两个区域，使用重叠更大的
+                        const hatOverlapLeft = (playerRect.x + playerRect.width) - hatRect.x;
+                        const hatOverlapRight = (hatRect.x + hatRect.width) - playerRect.x;
+                        const hatOverlapTop = (playerRect.y + playerRect.height) - hatRect.y;
+                        const hatOverlapBottom = (hatRect.y + hatRect.height) - playerRect.y;
+                        const hatMin = Math.min(hatOverlapLeft, hatOverlapRight, hatOverlapTop, hatOverlapBottom);
+
+                        const bodyOverlapLeft = (playerRect.x + playerRect.width) - bodyRect.x;
+                        const bodyOverlapRight = (bodyRect.x + bodyRect.width) - playerRect.x;
+                        const bodyOverlapTop = (playerRect.y + playerRect.height) - bodyRect.y;
+                        const bodyOverlapBottom = (bodyRect.y + bodyRect.height) - playerRect.y;
+                        const bodyMin = Math.min(bodyOverlapLeft, bodyOverlapRight, bodyOverlapTop, bodyOverlapBottom);
+
+                        if (hatMin <= bodyMin) {
+                            useRect = hatRect;
+                            overlapLeft = hatOverlapLeft;
+                            overlapRight = hatOverlapRight;
+                            overlapTop = hatOverlapTop;
+                            overlapBottom = hatOverlapBottom;
+                            minOverlap = hatMin;
+                        } else {
+                            useRect = bodyRect;
+                            overlapLeft = bodyOverlapLeft;
+                            overlapRight = bodyOverlapRight;
+                            overlapTop = bodyOverlapTop;
+                            overlapBottom = bodyOverlapBottom;
+                            minOverlap = bodyMin;
+                        }
+                    } else if (hitHat) {
+                        useRect = hatRect;
+                        overlapLeft = (playerRect.x + playerRect.width) - hatRect.x;
+                        overlapRight = (hatRect.x + hatRect.width) - playerRect.x;
+                        overlapTop = (playerRect.y + playerRect.height) - hatRect.y;
+                        overlapBottom = (hatRect.y + hatRect.height) - playerRect.y;
+                        minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+                    } else {
+                        useRect = bodyRect;
+                        overlapLeft = (playerRect.x + playerRect.width) - bodyRect.x;
+                        overlapRight = (bodyRect.x + bodyRect.width) - playerRect.x;
+                        overlapTop = (playerRect.y + playerRect.height) - bodyRect.y;
+                        overlapBottom = (bodyRect.y + bodyRect.height) - playerRect.y;
+                        minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+                    }
+
+                    // 根据碰撞方向处理
+                    if (minOverlap === overlapBottom && this.player.velocityY < 0) {
+                        hitCardFromBelow = card;
+                        this.player.y = useRect.y + useRect.height + 1;
+                        this.player.velocityY = 0;
+                    } else if (minOverlap === overlapTop && this.player.velocityY >= 0) {
+                        this.player.y = useRect.y - playerRect.height - 1;
+                        this.player.velocityY = 0;
+                        this.player.jumping = false;
+                        this.player.jumpCount = 0;
+                        onPlatform = true;
+                    } else if (minOverlap === overlapLeft || minOverlap === overlapRight) {
+                        if (overlapLeft < overlapRight) {
+                            this.player.x = useRect.x - playerRect.width - 1;
+                        } else {
+                            this.player.x = useRect.x + useRect.width + 1;
+                        }
+                    }
+                }
+                return;
+            }
+
             const offsetTop = card.collisionOffsetTop;
+            const offsetLeft = card.collisionOffsetLeft || 0;
+            const offsetRight = card.collisionOffsetRight || 0;
             const cardRect = {
-                x: card.x,
+                x: card.x - offsetLeft,
                 y: card.y - offsetTop,
-                width: card.width,
+                width: card.width + offsetLeft + offsetRight,
                 height: card.height + offsetTop
             };
 
