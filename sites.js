@@ -67,6 +67,58 @@ const sites = [
         category: "bush"
     },
 
+    // === 山丘：背景装饰，不参与碰撞 ===
+    {
+        name: "山丘",
+        description: "背景装饰",
+        icon: "",
+        color: "linear-gradient(180deg, #2d9b27 0%, #1e7a1c 100%)",
+        position: { x: 50 },
+        size: { width: 200, height: 80 },
+        category: "hill",
+        opacity: 0.5
+    },
+    {
+        name: "山丘",
+        description: "背景装饰",
+        icon: "",
+        color: "linear-gradient(180deg, #3cbf3c 0%, #2d9b27 100%)",
+        position: { x: 500 },
+        size: { width: 140, height: 55 },
+        category: "hill",
+        opacity: 0.6
+    },
+    {
+        name: "山丘",
+        description: "背景装饰",
+        icon: "",
+        color: "linear-gradient(180deg, #2d9b27 0%, #1e7a1c 100%)",
+        position: { x: 1050 },
+        size: { width: 180, height: 70 },
+        category: "hill",
+        opacity: 0.5
+    },
+    {
+        name: "山丘",
+        description: "背景装饰",
+        icon: "",
+        color: "linear-gradient(180deg, #3cbf3c 0%, #2d9b27 100%)",
+        position: { x: 1700 },
+        size: { width: 120, height: 48 },
+        category: "hill",
+        opacity: 0.6
+    },
+    {
+        name: "山丘",
+        description: "背景装饰",
+        icon: "",
+        color: "linear-gradient(180deg, #2d9b27 0%, #1e7a1c 100%)",
+        position: { x: 2050 },
+        size: { width: 160, height: 65 },
+        category: "hill",
+        opacity: 0.5
+    },
+
     // === 起步区：教学区域 ===
     {
         name: "金币",

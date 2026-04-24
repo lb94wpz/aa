@@ -137,6 +137,24 @@ class GameNavigator {
                 return;
             }
 
+            // 山丘：背景装饰，不参与碰撞
+            if (site.category === 'hill') {
+                const hill = document.createElement('div');
+                hill.className = 'bg-hill';
+                const w = site.size ? site.size.width : 140;
+                const h = site.size ? site.size.height : 55;
+                hill.style.width = w + 'px';
+                hill.style.height = h + 'px';
+                hill.style.left = site.position.x + 'px';
+                // 未指定 y 时自动贴地
+                const y = site.position.y != null ? site.position.y : (mapHeight - GROUND_HEIGHT - h);
+                hill.style.top = y + 'px';
+                if (site.color) hill.style.background = site.color;
+                if (site.opacity != null) hill.style.opacity = site.opacity;
+                this.worldElement.appendChild(hill);
+                return;
+            }
+
             const card = document.createElement('div');
             card.className = 'site-card ' + site.category;
             if (site.category !== 'pipe') {
@@ -185,23 +203,6 @@ class GameNavigator {
         const ground = document.createElement('div');
         ground.className = 'bg-ground';
         this.worldElement.appendChild(ground);
-
-        // 山丘
-        const hills = [
-            { left: '2%', width: 200, height: 80, cls: 'bg-hill-far' },
-            { left: '20%', width: 140, height: 55, cls: 'bg-hill-near' },
-            { left: '42%', width: 180, height: 70, cls: 'bg-hill-far' },
-            { left: '68%', width: 120, height: 48, cls: 'bg-hill-near' },
-            { left: '82%', width: 160, height: 65, cls: 'bg-hill-far' }
-        ];
-        hills.forEach(h => {
-            const el = document.createElement('div');
-            el.className = 'bg-hill ' + h.cls;
-            el.style.left = h.left;
-            el.style.width = h.width + 'px';
-            el.style.height = h.height + 'px';
-            this.worldElement.appendChild(el);
-        });
     }
 
     bindKeys() {

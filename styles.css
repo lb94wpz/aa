@@ -158,18 +158,9 @@ body {
 /* 山丘 */
 .bg-hill {
     position: absolute;
-    bottom: 48px;
     border-radius: 50% 50% 0 0;
     z-index: 2;
     pointer-events: none;
-}
-.bg-hill-far {
-    background: linear-gradient(180deg, #2d9b27 0%, #1e7a1c 100%);
-    opacity: 0.5;
-}
-.bg-hill-near {
-    background: linear-gradient(180deg, #3cbf3c 0%, #2d9b27 100%);
-    opacity: 0.6;
 }
 
 /* 灌木 */
