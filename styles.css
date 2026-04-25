@@ -403,18 +403,6 @@ body {
     50% { transform: translateY(-5px); }
 }
 
-.player-shadow {
-    position: absolute;
-    bottom: 5px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 30px;
-    height: 8px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 50%;
-    filter: blur(2px);
-}
-
 .player-transform-wrapper {
     position: absolute;
     top: 0;
