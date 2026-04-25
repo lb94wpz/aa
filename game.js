@@ -6,6 +6,71 @@ const PLAYER_SIZE_MIN = 32;          // 玩家最小尺寸（像素）
 const PLAYER_SIZE_MAX = 96;          // 玩家最大尺寸（像素）
 const GROUND_HEIGHT = 48;            // 地面高度（像素）
 
+// 玩家初始位置和物理参数
+const PLAYER_INIT_X = 400;           // 玩家初始X坐标
+const PLAYER_INIT_Y = 0;             // 玩家初始Y坐标
+const PLAYER_DECELERATION = 0.5;     // 减速度（每帧）
+const PLAYER_JUMP_FORCE = 12;        // 跳跃力度
+const PLAYER_GRAVITY = 0.6;          // 重力加速度
+const PLAYER_MAX_JUMP_COUNT = 2;     // 最大跳跃次数（二段跳）
+
+// 玩家移动倾斜参数
+const PLAYER_TILT_FAST_THRESHOLD = 3;    // 快速移动速度阈值
+const PLAYER_TILT_SLOW_THRESHOLD = 0.5;  // 慢速移动速度阈值
+const PLAYER_TILT_MAX_ANGLE = 15;        // 最大倾斜角度
+
+// 双击检测参数
+const DOUBLE_TAP_TIME_WINDOW = 400;  // 双击时间窗口（毫秒）
+
+// 日夜循环参数
+const DAY_NIGHT_CHECK_INTERVAL = 60000;  // 日夜切换检查间隔（毫秒）
+const DAY_START_HOUR = 6;                // 白天开始时间（小时）
+const DAY_END_HOUR = 18;                 // 白天结束时间（小时）
+
+// 世界生成参数
+const WORLD_EXTRA_WIDTH = 200;       // 世界额外宽度（像素）
+
+// 网站卡片默认尺寸
+const CARD_DEFAULT_WIDTH = 120;      // 卡片默认宽度
+const CARD_DEFAULT_HEIGHT = 120;     // 卡片默认高度
+
+// 管道参数
+const PIPE_HAT_HEIGHT = 32;          // 管道帽檐高度
+const PIPE_HAT_EXTEND = 16;          // 管道帽檐左右延伸
+const PIPE_COLLISION_OFFSET_TOP = 10;    // 管道碰撞顶部偏移
+const PIPE_COLLISION_OFFSET_SIDE = 16;   // 管道碰撞左右偏移
+
+// 装饰物默认尺寸
+const CLOUD_DEFAULT_WIDTH = 80;      // 云朵默认宽度
+const CLOUD_DEFAULT_HEIGHT = 36;     // 云朵默认高度
+const BUSH_DEFAULT_WIDTH = 60;       // 灌木默认宽度
+const BUSH_DEFAULT_HEIGHT = 24;      // 灌木默认高度
+const HILL_DEFAULT_WIDTH = 140;      // 山丘默认宽度
+const HILL_DEFAULT_HEIGHT = 55;      // 山丘默认高度
+
+// 气泡提示参数
+const BUBBLE_DISPLAY_DURATION = 2000;    // 气泡显示时长（毫秒）
+
+// 方块震动参数
+const SHAKE_ANIMATION_DURATION = 500;    // 震动动画时长（毫秒）
+
+// 砖块碎裂参数
+const BLOCK_BREAK_COLS = 4;          // 碎裂列数
+const BLOCK_BREAK_ROWS = 4;          // 碎裂行数
+const FRAGMENT_FLY_DURATION_MIN = 0.4;   // 碎片飞行最短时长（秒）
+const FRAGMENT_FLY_DURATION_MAX = 0.4;   // 碎片飞行随机时长范围（秒）
+const FRAGMENT_FLY_DELAY_MAX = 0.05;     // 碎片飞行延迟最大值（秒）
+
+// 碰撞检测参数
+const COLLISION_TOLERANCE = 0;       // 碰撞容差
+const COLLISION_POSITION_OFFSET = 1; // 碰撞后位置偏移
+
+// 玩家移动速度参数
+const TAP_SPEED = 3;                 // 单次按键速度
+const CONTINUOUS_ACCEL = 0.4;        // 连续加速
+const CONTINUOUS_MAX = 10;           // 连续移动最大速度
+const SPEED_BONUS_FACTOR = 0.3;      // 速度加成系数（跳跃时水平速度的加成）
+
 // 游戏导航器类 - 管理整个游戏的核心逻辑
 class GameNavigator {
     constructor() {
@@ -16,15 +81,15 @@ class GameNavigator {
         
         // 玩家状态对象
         this.player = {
-            x: 400,                    // 玩家X坐标
-            y: 0,                      // 玩家Y坐标
-            deceleration: 0.5,         // 减速度（每帧）
+            x: PLAYER_INIT_X,         // 玩家X坐标
+            y: PLAYER_INIT_Y,         // 玩家Y坐标
+            deceleration: PLAYER_DECELERATION,  // 减速度（每帧）
             velocityX: 0,              // 水平速度
             jumping: false,            // 是否正在跳跃
             jumpCount: 0,              // 当前跳跃次数（用于二段跳）
-            maxJumpCount: 2,           // 最大跳跃次数（二段跳）
-            jumpForce: 12,             // 跳跃力度
-            gravity: 0.6,              // 重力加速度
+            maxJumpCount: PLAYER_MAX_JUMP_COUNT,  // 最大跳跃次数（二段跳）
+            jumpForce: PLAYER_JUMP_FORCE,  // 跳跃力度
+            gravity: PLAYER_GRAVITY,   // 重力加速度
             velocityY: 0,              // 垂直速度
             groundY: 0,                // 地面Y坐标
             element: null,             // 玩家DOM元素
@@ -109,24 +174,22 @@ class GameNavigator {
     // 计算世界宽度（根据站点位置动态计算）
     calculateWorldWidth(mapRect) {
         const maxXFromSites = sites.reduce((max, s) => {
-            const w = s.size ? s.size.width : 120;
+            const w = s.size ? s.size.width : CARD_DEFAULT_WIDTH;
             return Math.max(max, s.position.x + w);
         }, 0);
-        return Math.max(mapRect.width, maxXFromSites + 200);
+        return Math.max(mapRect.width, maxXFromSites + WORLD_EXTRA_WIDTH);
     }
 
     // 初始化日夜循环系统
     initDayNightCycle() {
         this.updateDayNightTheme();
-        // 每分钟检查一次是否需要切换主题
-        setInterval(() => this.updateDayNightTheme(), 60000);
+        setInterval(() => this.updateDayNightTheme(), DAY_NIGHT_CHECK_INTERVAL);
     }
 
     // 更新日夜主题（根据当前时间切换白天/黑夜样式）
     updateDayNightTheme() {
         const hours = new Date().getHours();
-        // 6点到18点为白天，18点到次日6点为黑夜
-        const isNight = hours < 6 || hours >= 18;
+        const isNight = hours < DAY_START_HOUR || hours >= DAY_END_HOUR;
         
         if (isNight) {
             document.body.classList.add('night');
@@ -136,21 +199,19 @@ class GameNavigator {
     }
 
     // 创建管道的两个碰撞矩形（帽檐和主体）
-    // 管道顶部帽檐比主体宽，左右各延伸16px，向上延伸16px
     createPipeRects(card) {
-        const hatHeight = 32;  // 帽檐高度
         return {
             hat: {
-                x: card.x - 16,
-                y: card.y - 16,
-                width: card.width + 32,
-                height: hatHeight
+                x: card.x - PIPE_HAT_EXTEND,
+                y: card.y - PIPE_HAT_EXTEND,
+                width: card.width + PIPE_HAT_EXTEND * 2,
+                height: PIPE_HAT_HEIGHT
             },
             body: {
                 x: card.x,
-                y: card.y + hatHeight - 16,
+                y: card.y + PIPE_HAT_HEIGHT - PIPE_HAT_EXTEND,
                 width: card.width,
-                height: card.height - (hatHeight - 16)
+                height: card.height - (PIPE_HAT_HEIGHT - PIPE_HAT_EXTEND)
             }
         };
     }
@@ -180,11 +241,11 @@ class GameNavigator {
         if (direction === 'bottom' && this.player.velocityY < 0) {
             // 从下方碰撞：玩家向上顶到方块底部
             hitFromBelow = hitCard;
-            this.player.y = useRect.y + useRect.height + 1;
+            this.player.y = useRect.y + useRect.height + COLLISION_POSITION_OFFSET;
             this.player.velocityY = 0;
         } else if (direction === 'top' && this.player.velocityY >= 0) {
             // 从上方碰撞：玩家落到方块顶部
-            this.player.y = useRect.y - playerRect.height - 1;
+            this.player.y = useRect.y - playerRect.height - COLLISION_POSITION_OFFSET;
             this.player.velocityY = 0;
             this.player.jumping = false;
             this.player.jumpCount = 0;
@@ -192,8 +253,8 @@ class GameNavigator {
         } else if (direction === 'left' || direction === 'right') {
             // 侧边碰撞：将玩家推出方块
             this.player.x = direction === 'left' 
-                ? useRect.x - playerRect.width - 1 
-                : useRect.x + useRect.width + 1;
+                ? useRect.x - playerRect.width - COLLISION_POSITION_OFFSET 
+                : useRect.x + useRect.width + COLLISION_POSITION_OFFSET;
         }
 
         return { hitFromBelow, onPlatform };
@@ -202,8 +263,8 @@ class GameNavigator {
     // 处理管道碰撞检测（管道有帽檐和主体两个碰撞区域）
     handlePipeCollision(playerRect, card, isTransparent) {
         const { hat, body } = this.createPipeRects(card);
-        const hitHat = this.isColliding(playerRect, hat, 0);
-        const hitBody = this.isColliding(playerRect, body, 0);
+        const hitHat = this.isColliding(playerRect, hat, COLLISION_TOLERANCE);
+        const hitBody = this.isColliding(playerRect, body, COLLISION_TOLERANCE);
 
         // 没有碰撞则直接返回
         if (!hitHat && !hitBody) {
@@ -249,8 +310,8 @@ class GameNavigator {
                 this.createDecorElement('bg-cloud', site, mapHeight, {
                     widthProp: '--cloud-w',
                     heightProp: '--cloud-h',
-                    defaultWidth: 80,
-                    defaultHeight: 36
+                    defaultWidth: CLOUD_DEFAULT_WIDTH,
+                    defaultHeight: CLOUD_DEFAULT_HEIGHT
                 });
                 return;
             }
@@ -259,16 +320,16 @@ class GameNavigator {
                 this.createDecorElement('bg-bush', site, mapHeight, {
                     widthProp: '--bush-w',
                     heightProp: '--bush-h',
-                    defaultWidth: 60,
-                    defaultHeight: 24
+                    defaultWidth: BUSH_DEFAULT_WIDTH,
+                    defaultHeight: BUSH_DEFAULT_HEIGHT
                 });
                 return;
             }
 
             if (site.category === 'hill') {
                 this.createDecorElement('bg-hill', site, mapHeight, {
-                    defaultWidth: 140,
-                    defaultHeight: 55,
+                    defaultWidth: HILL_DEFAULT_WIDTH,
+                    defaultHeight: HILL_DEFAULT_HEIGHT,
                     useDirectStyle: true
                 });
                 return;
@@ -316,10 +377,10 @@ class GameNavigator {
         card.style.left = site.position.x + 'px';
         card.style.top = site.position.y + 'px';
 
-        const cardWidth = site.size ? site.size.width : 120;
+        const cardWidth = site.size ? site.size.width : CARD_DEFAULT_WIDTH;
         const cardHeight = site.category === 'pipe'
             ? mapHeight - GROUND_HEIGHT - site.position.y
-            : (site.size ? site.size.height : 120);
+            : (site.size ? site.size.height : CARD_DEFAULT_HEIGHT);
         card.style.width = cardWidth + 'px';
         card.style.height = cardHeight + 'px';
 
@@ -349,9 +410,9 @@ class GameNavigator {
             y: site.position.y,
             width: cardWidth,
             height: cardHeight,
-            collisionOffsetTop: site.category === 'pipe' ? 10 : 0,
-            collisionOffsetLeft: site.category === 'pipe' ? 16 : 0,
-            collisionOffsetRight: site.category === 'pipe' ? 16 : 0,
+            collisionOffsetTop: site.category === 'pipe' ? PIPE_COLLISION_OFFSET_TOP : 0,
+            collisionOffsetLeft: site.category === 'pipe' ? PIPE_COLLISION_OFFSET_SIDE : 0,
+            collisionOffsetRight: site.category === 'pipe' ? PIPE_COLLISION_OFFSET_SIDE : 0,
             transparent: site.transparent === true,
             revealed: false
         });
@@ -373,10 +434,10 @@ class GameNavigator {
                 e.preventDefault();
             }
 
-            // 检测连续按两次：上次按键松开过 且 在400ms内再次按下
+            // 检测连续按两次：上次按键松开过 且 在时间窗口内再次按下
             if ((key === 'arrowleft' || key === 'arrowright') && !e.repeat) {
                 const now = Date.now();
-                if (this.keyReleased[key] && (now - this.lastTapTime[key]) < 400) {
+                if (this.keyReleased[key] && (now - this.lastTapTime[key]) < DOUBLE_TAP_TIME_WINDOW) {
                     this.doubleTap[key] = true;
                 }
                 this.lastTapTime[key] = now;
@@ -455,22 +516,22 @@ class GameNavigator {
         let direction = this.player.direction;
         let transform = '';
 
-        if (velocity > 3) {
+        if (velocity > PLAYER_TILT_FAST_THRESHOLD) {
             // 向右快速移动：添加向右倾斜效果
             direction = 1;
-            const tilt = Math.min((velocity - 3) * 2, 15);
+            const tilt = Math.min((velocity - PLAYER_TILT_FAST_THRESHOLD) * 2, PLAYER_TILT_MAX_ANGLE);
             transform = `scaleX(1) rotate(${tilt}deg)`;
-        } else if (velocity < -3) {
+        } else if (velocity < -PLAYER_TILT_FAST_THRESHOLD) {
             // 向左快速移动：添加向左倾斜效果
             // 注意：scaleX(-1) 会翻转坐标系，所以需要用正的 tilt 值来实现向左倾斜的视觉效果
             direction = -1;
-            const tilt = Math.min((Math.abs(velocity) - 3) * 2, 15);
+            const tilt = Math.min((Math.abs(velocity) - PLAYER_TILT_FAST_THRESHOLD) * 2, PLAYER_TILT_MAX_ANGLE);
             transform = `scaleX(-1) rotate(${tilt}deg)`;
-        } else if (velocity > 0.5) {
+        } else if (velocity > PLAYER_TILT_SLOW_THRESHOLD) {
             // 向右慢速移动：不倾斜
             direction = 1;
             transform = `scaleX(1)`;
-        } else if (velocity < -0.5) {
+        } else if (velocity < -PLAYER_TILT_SLOW_THRESHOLD) {
             // 向左慢速移动：不倾斜
             direction = -1;
             transform = `scaleX(-1)`;
@@ -505,7 +566,7 @@ class GameNavigator {
                     height: card.height + card.collisionOffsetTop
                 };
 
-                if (this.isColliding(playerRect, cardRect, 0)) {
+                if (this.isColliding(playerRect, cardRect, COLLISION_TOLERANCE)) {
                     if (card.data.category === 'pipe') {
                         result = this.handlePipeCollision(playerRect, card, true);
                     } else {
@@ -516,7 +577,7 @@ class GameNavigator {
                             hitCardFromBelow = card;
                             card.revealed = true;
                             card.element.classList.add('revealed');
-                            this.player.y = cardRect.y + cardRect.height + 1;
+                            this.player.y = cardRect.y + cardRect.height + COLLISION_POSITION_OFFSET;
                             this.player.velocityY = 0;
                         }
                     }
@@ -537,7 +598,7 @@ class GameNavigator {
                     height: card.height + offsetTop
                 };
 
-                if (this.isColliding(playerRect, cardRect, 0)) {
+                if (this.isColliding(playerRect, cardRect, COLLISION_TOLERANCE)) {
                     const overlap = this.calculateOverlap(playerRect, cardRect);
                     result = this.handleCollisionResponse(playerRect, cardRect, overlap, card);
                 }
@@ -648,7 +709,7 @@ class GameNavigator {
 
         this.bubbleTimer = setTimeout(() => {
             this.hideBubble();
-        }, 2000);
+        }, BUBBLE_DISPLAY_DURATION);
     }
 
     hideBubble() {
@@ -676,11 +737,11 @@ class GameNavigator {
     shakeCard(cardElement) {
         cardElement.style.animation = 'none';
         cardElement.offsetHeight;
-        cardElement.style.animation = 'shake 0.5s ease-in-out';
+        cardElement.style.animation = `shake ${SHAKE_ANIMATION_DURATION}ms ease-in-out`;
         
         setTimeout(() => {
             cardElement.style.animation = '';
-        }, 500);
+        }, SHAKE_ANIMATION_DURATION);
     }
 
     breakCard(cardObj) {
@@ -690,8 +751,8 @@ class GameNavigator {
         const relX = cardObj.x;
         const relY = cardObj.y;
 
-        const cols = 4;
-        const rows = 4;
+        const cols = BLOCK_BREAK_COLS;
+        const rows = BLOCK_BREAK_ROWS;
         const fragW = cardW / cols;
         const fragH = cardH / rows;
 
@@ -713,8 +774,8 @@ class GameNavigator {
                 frag.style.setProperty('--fx', fx + 'px');
                 frag.style.setProperty('--fy', fy + 'px');
                 frag.style.setProperty('--fr', fr + 'deg');
-                frag.style.animation = `fragmentFly ${0.4 + Math.random() * 0.4}s ease-out forwards`;
-                frag.style.animationDelay = (Math.random() * 0.05) + 's';
+                frag.style.animation = `fragmentFly ${FRAGMENT_FLY_DURATION_MIN + Math.random() * FRAGMENT_FLY_DURATION_MAX}s ease-out forwards`;
+                frag.style.animationDelay = (Math.random() * FRAGMENT_FLY_DELAY_MAX) + 's';
 
                 this.worldElement.appendChild(frag);
 
@@ -824,9 +885,6 @@ class GameNavigator {
 
     gameLoop() {
         const maxX = this.worldWidth - this.currentPlayerSize;
-        const TAP_SPEED = 3;
-        const CONTINUOUS_ACCEL = 0.4;
-        const CONTINUOUS_MAX = 10;
 
         const leftKey = this.keys['arrowleft'];
         const rightKey = this.keys['arrowright'];
@@ -861,7 +919,7 @@ class GameNavigator {
         if (jumpKeyPressed && !this.jumpKeyHeld && this.player.jumpCount < this.player.maxJumpCount) {
             this.player.jumping = true;
             this.player.jumpCount++;
-            const speedBonus = Math.abs(this.player.velocityX) * 0.3;
+            const speedBonus = Math.abs(this.player.velocityX) * SPEED_BONUS_FACTOR;
             this.player.velocityY = -(this.player.jumpForce + speedBonus);
         }
         this.jumpKeyHeld = jumpKeyPressed;
