@@ -1,44 +1,53 @@
 // ========== 游戏引擎 ==========
-const PLAYER_SIZE = 64;
-const PLAYER_SIZE_STEP = 8;
-const PLAYER_SIZE_MIN = 32;
-const PLAYER_SIZE_MAX = 96;
-const GROUND_HEIGHT = 48;
+// 玩家尺寸常量
+const PLAYER_SIZE = 64;              // 玩家初始大小（像素）
+const PLAYER_SIZE_STEP = 8;          // 每次变大/缩小的步长（像素）
+const PLAYER_SIZE_MIN = 32;          // 玩家最小尺寸（像素）
+const PLAYER_SIZE_MAX = 96;          // 玩家最大尺寸（像素）
+const GROUND_HEIGHT = 48;            // 地面高度（像素）
 
+// 游戏导航器类 - 管理整个游戏的核心逻辑
 class GameNavigator {
     constructor() {
+        // 初始化玩家尺寸的CSS变量
         document.documentElement.style.setProperty('--player-size', PLAYER_SIZE + 'px');
-        this.currentPlayerSize = PLAYER_SIZE;
-        this.totalCoins = 0;
+        this.currentPlayerSize = PLAYER_SIZE;  // 当前玩家尺寸
+        this.totalCoins = 0;                    // 总金币数
         
+        // 玩家状态对象
         this.player = {
-            x: 400,
-            y: 0,
-            deceleration: 0.5,
-            velocityX: 0,
-            jumping: false,
-            jumpCount: 0,
-            maxJumpCount: 2,
-            jumpForce: 12,
-            gravity: 0.6,
-            velocityY: 0,
-            groundY: 0,
-            element: null,
-            direction: 1 // 1 表示向右，-1 表示向左
+            x: 400,                    // 玩家X坐标
+            y: 0,                      // 玩家Y坐标
+            deceleration: 0.5,         // 减速度（每帧）
+            velocityX: 0,              // 水平速度
+            jumping: false,            // 是否正在跳跃
+            jumpCount: 0,              // 当前跳跃次数（用于二段跳）
+            maxJumpCount: 2,           // 最大跳跃次数（二段跳）
+            jumpForce: 12,             // 跳跃力度
+            gravity: 0.6,              // 重力加速度
+            velocityY: 0,              // 垂直速度
+            groundY: 0,                // 地面Y坐标
+            element: null,             // 玩家DOM元素
+            direction: 1               // 玩家朝向：1=向右，-1=向左
         };
         
-        this.keys = {};
-        this.jumpKeyHeld = false;
-        this.doubleTap = { arrowleft: false, arrowright: false };
-        this.lastTapTime = { arrowleft: 0, arrowright: 0 };
-        this.keyReleased = { arrowleft: true, arrowright: true };
-        this.siteCards = [];
-        this.mapElement = null;
+        // 键盘状态
+        this.keys = {};                                    // 当前按下的键
+        this.jumpKeyHeld = false;                          // 跳跃键是否按住
+        this.doubleTap = { arrowleft: false, arrowright: false };  // 双击方向键状态
+        this.lastTapTime = { arrowleft: 0, arrowright: 0 };        // 上次按键时间
+        this.keyReleased = { arrowleft: true, arrowright: true };  // 按键是否已释放
         
+        this.siteCards = [];       // 网站卡片数组（用于碰撞检测）
+        this.mapElement = null;    // 游戏地图DOM元素
+        
+        // 初始化游戏
         this.init();
     }
 
+    // 初始化游戏
     init() {
+        // 获取DOM元素引用
         this.mapElement = document.getElementById('gameMap');
         this.player.element = document.getElementById('player');
         this.player.transformWrapper = this.player.element.querySelector('.player-transform-wrapper');
@@ -46,79 +55,77 @@ class GameNavigator {
         this.bubbleContent = document.getElementById('bubbleContent');
         this.bubbleTimer = null;
         this.helpDialogOpen = false;
-        this.cameraX = 0;
-        this.worldWidth = 0;
-        this.worldElement = null;
+        this.cameraX = 0;          // 摄像机X偏移
+        this.worldElement = null;  // 世界容器元素
 
-        // 帮助按钮事件
+        // 帮助对话框相关元素
         this.helpBtn = document.getElementById('helpBtn');
         this.helpDialog = document.getElementById('helpDialog');
         this.helpCloseBtn = document.getElementById('helpClose');
         
+        // 绑定帮助对话框事件
         this.helpBtn.addEventListener('click', () => this.showHelpDialog());
         this.helpCloseBtn.addEventListener('click', () => this.hideHelpDialog());
         this.helpDialog.querySelector('.dialog-overlay').addEventListener('click', () => this.hideHelpDialog());
 
-        // 创建世界容器 - 根据sites数据动态计算地图宽度
-        const maxXFromSites = sites.reduce((max, s) => {
-            const w = s.size ? s.size.width : 120;
-            return Math.max(max, s.position.x + w);
-        }, 0);
-        const initMapRect = this.mapElement.getBoundingClientRect();
-        this.worldWidth = Math.max(initMapRect.width, maxXFromSites + 200);
+        // 计算世界宽度并创建世界容器
+        const mapRect = this.mapElement.getBoundingClientRect();
+        this.worldWidth = this.calculateWorldWidth(mapRect);
 
         this.worldElement = document.createElement('div');
         this.worldElement.className = 'game-world';
         this.worldElement.style.width = this.worldWidth + 'px';
 
-        // 创建地面、山丘、灌木 - 随世界滚动
-        this.createGroundDecor(initMapRect.height);
+        // 创建地面装饰
+        this.createGroundDecor(mapRect.height);
 
-        // 将玩家移入世界容器
+        // 将玩家移入世界容器，并插入到地图最前面
         this.player.element.remove();
         this.worldElement.appendChild(this.player.element);
         this.mapElement.insertBefore(this.worldElement, this.mapElement.firstChild);
 
-        // 初始化网站卡片
+        // 创建网站卡片
         this.createSiteCards();
-        
         // 绑定键盘事件
         this.bindKeys();
         
-        // 更新统计
+        // 更新网站计数显示
         const websiteCount = sites.filter(s => s.category === 'website').length;
         document.getElementById('siteCount').textContent = websiteCount;
         
         // 设置玩家初始位置为地面上方
-        this.player.groundY = initMapRect.height - GROUND_HEIGHT - this.currentPlayerSize;
+        this.player.groundY = mapRect.height - GROUND_HEIGHT - this.currentPlayerSize;
         this.player.y = this.player.groundY;
         
         // 启动游戏循环
         this.gameLoop();
-        
-        // 窗口大小变化时重新定位
+        // 监听窗口大小变化
         window.addEventListener('resize', () => this.handleResize());
-        
-        // 初始定位
         this.handleResize();
-        
         // 初始化日夜循环
         this.initDayNightCycle();
     }
 
+    // 计算世界宽度（根据站点位置动态计算）
+    calculateWorldWidth(mapRect) {
+        const maxXFromSites = sites.reduce((max, s) => {
+            const w = s.size ? s.size.width : 120;
+            return Math.max(max, s.position.x + w);
+        }, 0);
+        return Math.max(mapRect.width, maxXFromSites + 200);
+    }
+
+    // 初始化日夜循环系统
     initDayNightCycle() {
-        // 根据当前时间设置初始主题
         this.updateDayNightTheme();
-        
         // 每分钟检查一次是否需要切换主题
         setInterval(() => this.updateDayNightTheme(), 60000);
     }
 
+    // 更新日夜主题（根据当前时间切换白天/黑夜样式）
     updateDayNightTheme() {
-        const now = new Date();
-        const hours = now.getHours();
-        
-        // 6 点到 18 点为白天，18 点到次日 6 点为黑夜
+        const hours = new Date().getHours();
+        // 6点到18点为白天，18点到次日6点为黑夜
         const isNight = hours < 6 || hours >= 18;
         
         if (isNight) {
@@ -128,109 +135,225 @@ class GameNavigator {
         }
     }
 
+    // 创建管道的两个碰撞矩形（帽檐和主体）
+    // 管道顶部帽檐比主体宽，左右各延伸16px，向上延伸16px
+    createPipeRects(card) {
+        const hatHeight = 32;  // 帽檐高度
+        return {
+            hat: {
+                x: card.x - 16,
+                y: card.y - 16,
+                width: card.width + 32,
+                height: hatHeight
+            },
+            body: {
+                x: card.x,
+                y: card.y + hatHeight - 16,
+                width: card.width,
+                height: card.height - (hatHeight - 16)
+            }
+        };
+    }
+
+    // 计算两个矩形的重叠区域（四个方向的重叠量）
+    calculateOverlap(playerRect, cardRect) {
+        return {
+            left: (playerRect.x + playerRect.width) - cardRect.x,       // 左侧重叠
+            right: (cardRect.x + cardRect.width) - playerRect.x,        // 右侧重叠
+            top: (playerRect.y + playerRect.height) - cardRect.y,       // 顶部重叠
+            bottom: (cardRect.y + cardRect.height) - playerRect.y       // 底部重叠
+        };
+    }
+
+    // 获取最小重叠方向（用于判断碰撞方向）
+    getMinOverlapDirection(overlap) {
+        const min = Math.min(overlap.left, overlap.right, overlap.top, overlap.bottom);
+        return { min, direction: min === overlap.left ? 'left' : min === overlap.right ? 'right' : min === overlap.top ? 'top' : 'bottom' };
+    }
+
+    // 处理碰撞响应（根据碰撞方向调整玩家位置）
+    handleCollisionResponse(playerRect, useRect, overlap, hitCard) {
+        const { min, direction } = this.getMinOverlapDirection(overlap);
+        let hitFromBelow = null;
+        let onPlatform = false;
+
+        if (direction === 'bottom' && this.player.velocityY < 0) {
+            // 从下方碰撞：玩家向上顶到方块底部
+            hitFromBelow = hitCard;
+            this.player.y = useRect.y + useRect.height + 1;
+            this.player.velocityY = 0;
+        } else if (direction === 'top' && this.player.velocityY >= 0) {
+            // 从上方碰撞：玩家落到方块顶部
+            this.player.y = useRect.y - playerRect.height - 1;
+            this.player.velocityY = 0;
+            this.player.jumping = false;
+            this.player.jumpCount = 0;
+            onPlatform = true;
+        } else if (direction === 'left' || direction === 'right') {
+            // 侧边碰撞：将玩家推出方块
+            this.player.x = direction === 'left' 
+                ? useRect.x - playerRect.width - 1 
+                : useRect.x + useRect.width + 1;
+        }
+
+        return { hitFromBelow, onPlatform };
+    }
+
+    // 处理管道碰撞检测（管道有帽檐和主体两个碰撞区域）
+    handlePipeCollision(playerRect, card, isTransparent) {
+        const { hat, body } = this.createPipeRects(card);
+        const hitHat = this.isColliding(playerRect, hat, 0);
+        const hitBody = this.isColliding(playerRect, body, 0);
+
+        // 没有碰撞则直接返回
+        if (!hitHat && !hitBody) {
+            return { hitFromBelow: null, onPlatform: false };
+        }
+
+        // 如果是透明管道且未显示，碰撞后立即显示
+        if (isTransparent && !card.revealed) {
+            card.revealed = true;
+            card.element.classList.add('revealed');
+        }
+
+        let useRect, overlap;
+
+        if (hitHat && hitBody) {
+            // 同时碰撞帽檐和主体，使用重叠更大的区域
+            const hatOverlap = this.calculateOverlap(playerRect, hat);
+            const bodyOverlap = this.calculateOverlap(playerRect, body);
+            const hatMin = Math.min(hatOverlap.left, hatOverlap.right, hatOverlap.top, hatOverlap.bottom);
+            const bodyMin = Math.min(bodyOverlap.left, bodyOverlap.right, bodyOverlap.top, bodyOverlap.bottom);
+
+            if (hatMin <= bodyMin) {
+                useRect = hat;
+                overlap = hatOverlap;
+            } else {
+                useRect = body;
+                overlap = bodyOverlap;
+            }
+        } else {
+            // 只碰撞一个区域
+            useRect = hitHat ? hat : body;
+            overlap = this.calculateOverlap(playerRect, useRect);
+        }
+
+        return this.handleCollisionResponse(playerRect, useRect, overlap, card);
+    }
+
     createSiteCards() {
         const mapHeight = this.mapElement.getBoundingClientRect().height;
 
         sites.forEach((site) => {
-            // 云朵：背景装饰，不参与碰撞
             if (site.category === 'cloud') {
-                const cloud = document.createElement('div');
-                cloud.className = 'bg-cloud';
-                const w = site.size ? site.size.width : 80;
-                const h = site.size ? site.size.height : 36;
-                cloud.style.setProperty('--cloud-w', w + 'px');
-                cloud.style.setProperty('--cloud-h', h + 'px');
-                cloud.style.left = site.position.x + 'px';
-                cloud.style.top = site.position.y + 'px';
-                this.worldElement.appendChild(cloud);
-                return; // 不加入 siteCards，跳过碰撞
+                this.createDecorElement('bg-cloud', site, mapHeight, {
+                    widthProp: '--cloud-w',
+                    heightProp: '--cloud-h',
+                    defaultWidth: 80,
+                    defaultHeight: 36
+                });
+                return;
             }
 
-            // 灌木：背景装饰，不参与碰撞
             if (site.category === 'bush') {
-                const bush = document.createElement('div');
-                bush.className = 'bg-bush';
-                const w = site.size ? site.size.width : 60;
-                const h = site.size ? site.size.height : 24;
-                bush.style.setProperty('--bush-w', w + 'px');
-                bush.style.setProperty('--bush-h', h + 'px');
-                bush.style.left = site.position.x + 'px';
-                // 未指定 y 时自动贴地
-                const y = site.position.y != null ? site.position.y : (mapHeight - GROUND_HEIGHT - h);
-                bush.style.top = y + 'px';
-                this.worldElement.appendChild(bush);
+                this.createDecorElement('bg-bush', site, mapHeight, {
+                    widthProp: '--bush-w',
+                    heightProp: '--bush-h',
+                    defaultWidth: 60,
+                    defaultHeight: 24
+                });
                 return;
             }
 
-            // 山丘：背景装饰，不参与碰撞
             if (site.category === 'hill') {
-                const hill = document.createElement('div');
-                hill.className = 'bg-hill';
-                const w = site.size ? site.size.width : 140;
-                const h = site.size ? site.size.height : 55;
-                hill.style.width = w + 'px';
-                hill.style.height = h + 'px';
-                hill.style.left = site.position.x + 'px';
-                // 未指定 y 时自动贴地
-                const y = site.position.y != null ? site.position.y : (mapHeight - GROUND_HEIGHT - h);
-                hill.style.top = y + 'px';
-                if (site.color) hill.style.background = site.color;
-                if (site.opacity != null) hill.style.opacity = site.opacity;
-                this.worldElement.appendChild(hill);
+                this.createDecorElement('bg-hill', site, mapHeight, {
+                    defaultWidth: 140,
+                    defaultHeight: 55,
+                    useDirectStyle: true
+                });
                 return;
             }
 
-            const card = document.createElement('div');
-            card.className = 'site-card ' + site.category;
-            if (site.category !== 'pipe') {
-                card.style.background = site.color;
+            this.createCardElement(site, mapHeight);
+        });
+    }
+
+    createDecorElement(className, site, mapHeight, options) {
+        const element = document.createElement('div');
+        element.className = className;
+        
+        const w = site.size ? site.size.width : options.defaultWidth;
+        const h = site.size ? site.size.height : options.defaultHeight;
+
+        if (options.widthProp) {
+            element.style.setProperty(options.widthProp, w + 'px');
+        } else if (options.useDirectStyle) {
+            element.style.width = w + 'px';
+        }
+
+        if (options.heightProp) {
+            element.style.setProperty(options.heightProp, h + 'px');
+        } else if (options.useDirectStyle) {
+            element.style.height = h + 'px';
+        }
+
+        element.style.left = site.position.x + 'px';
+        const y = site.position.y != null ? site.position.y : (mapHeight - GROUND_HEIGHT - h);
+        element.style.top = y + 'px';
+
+        if (site.color) element.style.background = site.color;
+        if (site.opacity != null) element.style.opacity = site.opacity;
+
+        this.worldElement.appendChild(element);
+    }
+
+    createCardElement(site, mapHeight) {
+        const card = document.createElement('div');
+        card.className = 'site-card ' + site.category;
+        if (site.category !== 'pipe') {
+            card.style.background = site.color;
+        }
+        card.style.left = site.position.x + 'px';
+        card.style.top = site.position.y + 'px';
+
+        const cardWidth = site.size ? site.size.width : 120;
+        const cardHeight = site.category === 'pipe'
+            ? mapHeight - GROUND_HEIGHT - site.position.y
+            : (site.size ? site.size.height : 120);
+        card.style.width = cardWidth + 'px';
+        card.style.height = cardHeight + 'px';
+
+        card.title = site.description;
+        card.innerHTML = `
+            <div class="site-icon">${site.icon}</div>
+            <div class="site-name">${site.name}</div>
+        `;
+
+        if (site.transparent) {
+            card.style.opacity = '0';
+            card.style.pointerEvents = 'none';
+        }
+
+        card.addEventListener('click', () => {
+            if (site.category === 'website') {
+                window.open(site.url, '_blank');
             }
-            card.style.left = site.position.x + 'px';
-            card.style.top = site.position.y + 'px';
+        });
 
-            const cardWidth = site.size ? site.size.width : 120;
-            const cardHeight = site.category === 'pipe'
-                ? mapHeight - GROUND_HEIGHT - site.position.y
-                : (site.size ? site.size.height : 120);
-            card.style.width = cardWidth + 'px';
-            card.style.height = cardHeight + 'px';
+        this.worldElement.appendChild(card);
 
-            card.title = site.description;
-            card.innerHTML = `
-                <div class="site-icon">${site.icon}</div>
-                <div class="site-name">${site.name}</div>
-            `;
-
-            // 透明方块初始隐藏
-            if (site.transparent) {
-                card.style.opacity = '0';
-                card.style.pointerEvents = 'none';
-            }
-
-            // 点击访问
-            card.addEventListener('click', () => {
-                if (site.category === 'website') {
-                    window.open(site.url, '_blank');
-                }
-            });
-
-            this.worldElement.appendChild(card);
-
-            this.siteCards.push({
-                element: card,
-                data: site,
-                x: site.position.x,
-                y: site.position.y,
-                width: cardWidth,
-                height: cardHeight,
-                // 碰撞框向上扩展的偏移量（管道的 ::before 帽檐向上延伸16px，左右各延伸16px）
-                collisionOffsetTop: site.category === 'pipe' ? 10 : 0,
-                collisionOffsetLeft: site.category === 'pipe' ? 16 : 0,
-                collisionOffsetRight: site.category === 'pipe' ? 16 : 0,
-                // 透明方块标记
-                transparent: site.transparent === true,
-                revealed: false
-            });
+        this.siteCards.push({
+            element: card,
+            data: site,
+            x: site.position.x,
+            y: site.position.y,
+            width: cardWidth,
+            height: cardHeight,
+            collisionOffsetTop: site.category === 'pipe' ? 10 : 0,
+            collisionOffsetLeft: site.category === 'pipe' ? 16 : 0,
+            collisionOffsetRight: site.category === 'pipe' ? 16 : 0,
+            transparent: site.transparent === true,
+            revealed: false
         });
     }
 
@@ -291,16 +414,10 @@ class GameNavigator {
     }
 
     handleResize() {
-        // 重新计算世界宽度
         const mapRect = this.mapElement.getBoundingClientRect();
-        const maxXFromSites = sites.reduce((max, s) => {
-            const w = s.size ? s.size.width : 120;
-            return Math.max(max, s.position.x + w);
-        }, 0);
-        this.worldWidth = Math.max(mapRect.width, maxXFromSites + 200);
+        this.worldWidth = this.calculateWorldWidth(mapRect);
         this.worldElement.style.width = this.worldWidth + 'px';
 
-        // 更新管道高度
         this.siteCards.forEach(card => {
             if (card.data.category === 'pipe') {
                 card.height = mapRect.height - GROUND_HEIGHT - card.y;
@@ -308,7 +425,6 @@ class GameNavigator {
             }
         });
 
-        // 确保玩家在地图范围内
         this.player.x = Math.min(Math.max(this.player.x, 0), this.worldWidth - this.currentPlayerSize);
         this.player.groundY = Math.min(this.player.groundY, mapRect.height - GROUND_HEIGHT - this.currentPlayerSize);
 
@@ -324,6 +440,7 @@ class GameNavigator {
         this.worldElement.style.transform = `translateX(${-this.cameraX}px)`;
     }
 
+    // 更新玩家位置和旋转角度
     updatePlayerPosition() {
         this.player.element.style.left = this.player.x + 'px';
         this.player.element.style.top = this.player.y + 'px';
@@ -334,28 +451,36 @@ class GameNavigator {
             return;
         }
         
-        // 根据移动速度添加倾斜效果（向右时）
-        if (this.player.velocityX > 3) {
-            this.player.direction = 1;
-            const tilt = Math.min((this.player.velocityX - 3) * 2, 15);
-            this.player.transformWrapper.style.transform = `scaleX(1) rotate(${tilt}deg)`;
+        const velocity = this.player.velocityX;
+        let direction = this.player.direction;
+        let transform = '';
+
+        if (velocity > 3) {
+            // 向右快速移动：添加向右倾斜效果
+            direction = 1;
+            const tilt = Math.min((velocity - 3) * 2, 15);
+            transform = `scaleX(1) rotate(${tilt}deg)`;
+        } else if (velocity < -3) {
+            // 向左快速移动：添加向左倾斜效果
+            // 注意：scaleX(-1) 会翻转坐标系，所以需要用正的 tilt 值来实现向左倾斜的视觉效果
+            direction = -1;
+            const tilt = Math.min((Math.abs(velocity) - 3) * 2, 15);
+            transform = `scaleX(-1) rotate(${tilt}deg)`;
+        } else if (velocity > 0.5) {
+            // 向右慢速移动：不倾斜
+            direction = 1;
+            transform = `scaleX(1)`;
+        } else if (velocity < -0.5) {
+            // 向左慢速移动：不倾斜
+            direction = -1;
+            transform = `scaleX(-1)`;
+        } else {
+            // 静止状态：保持当前方向
+            transform = `scaleX(${direction})`;
         }
-        else if (this.player.velocityX < -3) {
-            this.player.direction = -1;
-            const tilt = Math.min((Math.abs(this.player.velocityX) - 3) * 2, 15);
-            this.player.transformWrapper.style.transform = `scaleX(-1) rotate(${tilt}deg)`;
-        }
-        else if (this.player.velocityX > 0.5) {
-            this.player.direction = 1;
-            this.player.transformWrapper.style.transform = `scaleX(1)`;
-        }
-        else if (this.player.velocityX < -0.5) {
-            this.player.direction = -1;
-            this.player.transformWrapper.style.transform = `scaleX(-1)`;
-        }
-        else {
-            this.player.transformWrapper.style.transform = `scaleX(${this.player.direction})`;
-        }
+
+        this.player.direction = direction;
+        this.player.transformWrapper.style.transform = transform;
     }
 
     checkCollisions() {
@@ -370,7 +495,8 @@ class GameNavigator {
         let onPlatform = false;
 
         this.siteCards.forEach(card => {
-            // 透明方块未显示时的碰撞处理
+            let result = null;
+
             if (card.transparent && !card.revealed) {
                 const cardRect = {
                     x: card.x - (card.collisionOffsetLeft || 0),
@@ -380,258 +506,57 @@ class GameNavigator {
                 };
 
                 if (this.isColliding(playerRect, cardRect, 0)) {
-                    // 管道：分段碰撞检测，碰撞后立即显示
                     if (card.data.category === 'pipe') {
-                        const hatHeight = 32;
-                        const hatLeft = card.x - 16;
-                        const hatRight = card.x + card.width + 16;
-                        const hatTop = card.y - 16;
-                        const hatBottom = card.y + hatHeight - 16;
+                        result = this.handlePipeCollision(playerRect, card, true);
+                    } else {
+                        const overlap = this.calculateOverlap(playerRect, cardRect);
+                        const { min, direction } = this.getMinOverlapDirection(overlap);
                         
-                        const bodyLeft = card.x;
-                        const bodyRight = card.x + card.width;
-                        const bodyTop = hatBottom;
-                        const bodyBottom = card.y + card.height;
-
-                        const hatRect = { x: hatLeft, y: hatTop, width: hatRight - hatLeft, height: hatBottom - hatTop };
-                        const bodyRect = { x: bodyLeft, y: bodyTop, width: bodyRight - bodyLeft, height: bodyBottom - bodyTop };
-
-                        const hitHat = this.isColliding(playerRect, hatRect, 0);
-                        const hitBody = this.isColliding(playerRect, bodyRect, 0);
-
-                        if (hitHat || hitBody) {
-                            // 立即显示
+                        if (direction === 'bottom' && this.player.velocityY < 0) {
+                            hitCardFromBelow = card;
                             card.revealed = true;
                             card.element.classList.add('revealed');
-
-                            let useRect, overlapLeft, overlapRight, overlapTop, overlapBottom, minOverlap;
-
-                            if (hitHat && hitBody) {
-                                const hatOverlapLeft = (playerRect.x + playerRect.width) - hatRect.x;
-                                const hatOverlapRight = (hatRect.x + hatRect.width) - playerRect.x;
-                                const hatOverlapTop = (playerRect.y + playerRect.height) - hatRect.y;
-                                const hatOverlapBottom = (hatRect.y + hatRect.height) - playerRect.y;
-                                const hatMin = Math.min(hatOverlapLeft, hatOverlapRight, hatOverlapTop, hatOverlapBottom);
-
-                                const bodyOverlapLeft = (playerRect.x + playerRect.width) - bodyRect.x;
-                                const bodyOverlapRight = (bodyRect.x + bodyRect.width) - playerRect.x;
-                                const bodyOverlapTop = (playerRect.y + playerRect.height) - bodyRect.y;
-                                const bodyOverlapBottom = (bodyRect.y + bodyRect.height) - playerRect.y;
-                                const bodyMin = Math.min(bodyOverlapLeft, bodyOverlapRight, bodyOverlapTop, bodyOverlapBottom);
-
-                                if (hatMin <= bodyMin) {
-                                    useRect = hatRect;
-                                    overlapLeft = hatOverlapLeft;
-                                    overlapRight = hatOverlapRight;
-                                    overlapTop = hatOverlapTop;
-                                    overlapBottom = hatOverlapBottom;
-                                    minOverlap = hatMin;
-                                } else {
-                                    useRect = bodyRect;
-                                    overlapLeft = bodyOverlapLeft;
-                                    overlapRight = bodyOverlapRight;
-                                    overlapTop = bodyOverlapTop;
-                                    overlapBottom = bodyOverlapBottom;
-                                    minOverlap = bodyMin;
-                                }
-                            } else if (hitHat) {
-                                useRect = hatRect;
-                                overlapLeft = (playerRect.x + playerRect.width) - hatRect.x;
-                                overlapRight = (hatRect.x + hatRect.width) - playerRect.x;
-                                overlapTop = (playerRect.y + playerRect.height) - hatRect.y;
-                                overlapBottom = (hatRect.y + hatRect.height) - playerRect.y;
-                                minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
-                            } else {
-                                useRect = bodyRect;
-                                overlapLeft = (playerRect.x + playerRect.width) - bodyRect.x;
-                                overlapRight = (bodyRect.x + bodyRect.width) - playerRect.x;
-                                overlapTop = (playerRect.y + playerRect.height) - bodyRect.y;
-                                overlapBottom = (bodyRect.y + bodyRect.height) - playerRect.y;
-                                minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
-                            }
-
-                            if (minOverlap === overlapBottom && this.player.velocityY < 0) {
-                                hitCardFromBelow = card;
-                                this.player.y = useRect.y + useRect.height + 1;
-                                this.player.velocityY = 0;
-                            } else if (minOverlap === overlapTop && this.player.velocityY >= 0) {
-                                this.player.y = useRect.y - playerRect.height - 1;
-                                this.player.velocityY = 0;
-                                this.player.jumping = false;
-                                this.player.jumpCount = 0;
-                                onPlatform = true;
-                            } else if (minOverlap === overlapLeft || minOverlap === overlapRight) {
-                                if (overlapLeft < overlapRight) {
-                                    this.player.x = useRect.x - playerRect.width - 1;
-                                } else {
-                                    this.player.x = useRect.x + useRect.width + 1;
-                                }
-                            }
+                            this.player.y = cardRect.y + cardRect.height + 1;
+                            this.player.velocityY = 0;
                         }
-                        return;
-                    }
-
-                    // 其他透明方块：只检测从下方碰撞
-                    const overlapBottom = (cardRect.y + cardRect.height) - playerRect.y;
-                    const overlapTop = (playerRect.y + playerRect.height) - cardRect.y;
-                    const minOverlap = Math.min(overlapBottom, overlapTop);
-
-                    if (minOverlap === overlapBottom && this.player.velocityY < 0) {
-                        hitCardFromBelow = card;
-                        this.player.y = cardRect.y + cardRect.height + 1;
-                        this.player.velocityY = 0;
                     }
                 }
                 return;
             }
 
-            // 管道：分段碰撞检测（顶部帽檐宽，主体窄）
             if (card.data.category === 'pipe') {
-                const hatHeight = 32;
-                const hatLeft = card.x - 16;
-                const hatRight = card.x + card.width + 16;
-                const hatTop = card.y - 16;
-                const hatBottom = card.y + hatHeight - 16;
-                
-                const bodyLeft = card.x;
-                const bodyRight = card.x + card.width;
-                const bodyTop = hatBottom;
-                const bodyBottom = card.y + card.height;
+                result = this.handlePipeCollision(playerRect, card, false);
+            } else {
+                const offsetTop = card.collisionOffsetTop;
+                const offsetLeft = card.collisionOffsetLeft || 0;
+                const offsetRight = card.collisionOffsetRight || 0;
+                const cardRect = {
+                    x: card.x - offsetLeft,
+                    y: card.y - offsetTop,
+                    width: card.width + offsetLeft + offsetRight,
+                    height: card.height + offsetTop
+                };
 
-                // 检测帽檐碰撞
-                const hatRect = { x: hatLeft, y: hatTop, width: hatRight - hatLeft, height: hatBottom - hatTop };
-                // 检测主体碰撞
-                const bodyRect = { x: bodyLeft, y: bodyTop, width: bodyRight - bodyLeft, height: bodyBottom - bodyTop };
-
-                const hitHat = this.isColliding(playerRect, hatRect, 0);
-                const hitBody = this.isColliding(playerRect, bodyRect, 0);
-
-                if (hitHat || hitBody) {
-                    // 计算碰撞重叠
-                    let useRect, overlapLeft, overlapRight, overlapTop, overlapBottom, minOverlap;
-
-                    if (hitHat && hitBody) {
-                        // 同时碰撞两个区域，使用重叠更大的
-                        const hatOverlapLeft = (playerRect.x + playerRect.width) - hatRect.x;
-                        const hatOverlapRight = (hatRect.x + hatRect.width) - playerRect.x;
-                        const hatOverlapTop = (playerRect.y + playerRect.height) - hatRect.y;
-                        const hatOverlapBottom = (hatRect.y + hatRect.height) - playerRect.y;
-                        const hatMin = Math.min(hatOverlapLeft, hatOverlapRight, hatOverlapTop, hatOverlapBottom);
-
-                        const bodyOverlapLeft = (playerRect.x + playerRect.width) - bodyRect.x;
-                        const bodyOverlapRight = (bodyRect.x + bodyRect.width) - playerRect.x;
-                        const bodyOverlapTop = (playerRect.y + playerRect.height) - bodyRect.y;
-                        const bodyOverlapBottom = (bodyRect.y + bodyRect.height) - playerRect.y;
-                        const bodyMin = Math.min(bodyOverlapLeft, bodyOverlapRight, bodyOverlapTop, bodyOverlapBottom);
-
-                        if (hatMin <= bodyMin) {
-                            useRect = hatRect;
-                            overlapLeft = hatOverlapLeft;
-                            overlapRight = hatOverlapRight;
-                            overlapTop = hatOverlapTop;
-                            overlapBottom = hatOverlapBottom;
-                            minOverlap = hatMin;
-                        } else {
-                            useRect = bodyRect;
-                            overlapLeft = bodyOverlapLeft;
-                            overlapRight = bodyOverlapRight;
-                            overlapTop = bodyOverlapTop;
-                            overlapBottom = bodyOverlapBottom;
-                            minOverlap = bodyMin;
-                        }
-                    } else if (hitHat) {
-                        useRect = hatRect;
-                        overlapLeft = (playerRect.x + playerRect.width) - hatRect.x;
-                        overlapRight = (hatRect.x + hatRect.width) - playerRect.x;
-                        overlapTop = (playerRect.y + playerRect.height) - hatRect.y;
-                        overlapBottom = (hatRect.y + hatRect.height) - playerRect.y;
-                        minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
-                    } else {
-                        useRect = bodyRect;
-                        overlapLeft = (playerRect.x + playerRect.width) - bodyRect.x;
-                        overlapRight = (bodyRect.x + bodyRect.width) - playerRect.x;
-                        overlapTop = (playerRect.y + playerRect.height) - bodyRect.y;
-                        overlapBottom = (bodyRect.y + bodyRect.height) - playerRect.y;
-                        minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
-                    }
-
-                    // 根据碰撞方向处理
-                    if (minOverlap === overlapBottom && this.player.velocityY < 0) {
-                        hitCardFromBelow = card;
-                        this.player.y = useRect.y + useRect.height + 1;
-                        this.player.velocityY = 0;
-                    } else if (minOverlap === overlapTop && this.player.velocityY >= 0) {
-                        this.player.y = useRect.y - playerRect.height - 1;
-                        this.player.velocityY = 0;
-                        this.player.jumping = false;
-                        this.player.jumpCount = 0;
-                        onPlatform = true;
-                    } else if (minOverlap === overlapLeft || minOverlap === overlapRight) {
-                        if (overlapLeft < overlapRight) {
-                            this.player.x = useRect.x - playerRect.width - 1;
-                        } else {
-                            this.player.x = useRect.x + useRect.width + 1;
-                        }
-                    }
+                if (this.isColliding(playerRect, cardRect, 0)) {
+                    const overlap = this.calculateOverlap(playerRect, cardRect);
+                    result = this.handleCollisionResponse(playerRect, cardRect, overlap, card);
                 }
-                return;
             }
 
-            const offsetTop = card.collisionOffsetTop;
-            const offsetLeft = card.collisionOffsetLeft || 0;
-            const offsetRight = card.collisionOffsetRight || 0;
-            const cardRect = {
-                x: card.x - offsetLeft,
-                y: card.y - offsetTop,
-                width: card.width + offsetLeft + offsetRight,
-                height: card.height + offsetTop
-            };
-
-            // 检测基础碰撞（不使用 padding，精确检测）
-            if (this.isColliding(playerRect, cardRect, 0)) {
-                // 计算碰撞重叠区域
-                const overlapLeft = (playerRect.x + playerRect.width) - cardRect.x;
-                const overlapRight = (cardRect.x + cardRect.width) - playerRect.x;
-                const overlapTop = (playerRect.y + playerRect.height) - cardRect.y;
-                const overlapBottom = (cardRect.y + cardRect.height) - playerRect.y;
-                
-                // 找出最小重叠方向
-                const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
-                
-                // 从下方碰撞：玩家向上移动，顶部撞到卡片底部
-                if (minOverlap === overlapBottom && this.player.velocityY < 0) {
-                    hitCardFromBelow = card;
-                    // 将玩家推出到卡片下方
-                    this.player.y = cardRect.y + cardRect.height + 1;
-                    this.player.velocityY = 0;
+            if (result) {
+                if (result.hitFromBelow) {
+                    hitCardFromBelow = result.hitFromBelow;
                 }
-                // 从上方碰撞：玩家向下移动，底部撞到卡片顶部
-                else if (minOverlap === overlapTop && this.player.velocityY >= 0) {
-                    // 将玩家推出到卡片上方
-                    this.player.y = cardRect.y - playerRect.height - 1;
-                    this.player.velocityY = 0;
-                    this.player.jumping = false;
-                    this.player.jumpCount = 0;
+                if (result.onPlatform) {
                     onPlatform = true;
-                }
-                // 侧边碰撞：不添加 active 类，不触发震动
-                else if (minOverlap === overlapLeft || minOverlap === overlapRight) {
-                    // 从左边碰撞：将玩家推出到卡片左侧
-                    if (overlapLeft < overlapRight) {
-                        this.player.x = cardRect.x - playerRect.width - 1;
-                    }
-                    // 从右边碰撞：将玩家推出到卡片右侧
-                    else {
-                        this.player.x = cardRect.x + cardRect.width + 1;
-                    }
                 }
             }
         });
 
-        // 更新 onPlatform 状态
+        // 更新玩家的 onPlatform 状态
         this.player.onPlatform = onPlatform;
 
-        // 只有从下方碰撞才触发震动和弹窗
+        // 只有从下方碰撞才触发震动和对应效果
         if (hitCardFromBelow) {
             // 如果是透明方块且未显示，先显示它
             if (hitCardFromBelow.transparent && !hitCardFromBelow.revealed) {
@@ -641,27 +566,33 @@ class GameNavigator {
 
             const category = hitCardFromBelow.data.category;
             
-            // 先震动
+            // 先给方块添加震动效果
             this.shakeCard(hitCardFromBelow.element);
             
-            // 再处理其他逻辑
+            // 根据方块类型处理碰撞效果
             if (category === 'grow') {
+                // 变大方块：玩家变大
                 this.changePlayerSize(PLAYER_SIZE_STEP);
                 this.player.velocityY = 0;
             } else if (category === 'shrink') {
+                // 缩小方块：玩家缩小
                 this.changePlayerSize(-PLAYER_SIZE_STEP);
                 this.player.velocityY = 0;
             } else if (category === 'coin') {
+                // 金币方块：收集金币
                 this.collectCoin(hitCardFromBelow);
                 this.player.velocityY = 0;
             } else if (category === 'pipe') {
+                // 水管：只停止向上移动，不弹出对话框
                 this.player.velocityY = 0;
             } else if (category === 'block') {
+                // 砖块：如果玩家足够大则打破砖块
                 if (this.currentPlayerSize >= PLAYER_SIZE_MAX) {
                     this.breakCard(hitCardFromBelow);
                 }
                 this.player.velocityY = 0;
-            } else {
+            } else if (category === 'website') {
+                // 网站卡片：弹出对话框
                 this.hitCardFromBelow(hitCardFromBelow.data, hitCardFromBelow.element);
             }
         }
@@ -897,56 +828,48 @@ class GameNavigator {
         const CONTINUOUS_ACCEL = 0.4;
         const CONTINUOUS_MAX = 10;
 
-        if (this.keys['arrowleft']) {
-            if (this.doubleTap.arrowleft) {
-                this.player.velocityX -= CONTINUOUS_ACCEL;
-                if (this.player.velocityX < -CONTINUOUS_MAX) {
-                    this.player.velocityX = -CONTINUOUS_MAX;
+        const leftKey = this.keys['arrowleft'];
+        const rightKey = this.keys['arrowright'];
+
+        if (leftKey || rightKey) {
+            const direction = leftKey ? -1 : 1;
+            const doubleTapKey = leftKey ? this.doubleTap.arrowleft : this.doubleTap.arrowright;
+
+            if (doubleTapKey) {
+                this.player.velocityX += CONTINUOUS_ACCEL * direction;
+                const maxVelocity = CONTINUOUS_MAX * direction;
+                if ((direction === -1 && this.player.velocityX < maxVelocity) ||
+                    (direction === 1 && this.player.velocityX > maxVelocity)) {
+                    this.player.velocityX = maxVelocity;
                 }
             } else {
-                if (this.player.velocityX > -TAP_SPEED) {
-                    this.player.velocityX = -TAP_SPEED;
-                }
-            }
-        } else if (this.keys['arrowright']) {
-            if (this.doubleTap.arrowright) {
-                this.player.velocityX += CONTINUOUS_ACCEL;
-                if (this.player.velocityX > CONTINUOUS_MAX) {
-                    this.player.velocityX = CONTINUOUS_MAX;
-                }
-            } else {
-                if (this.player.velocityX < TAP_SPEED) {
-                    this.player.velocityX = TAP_SPEED;
+                const targetSpeed = TAP_SPEED * direction;
+                if ((direction === -1 && this.player.velocityX > targetSpeed) ||
+                    (direction === 1 && this.player.velocityX < targetSpeed)) {
+                    this.player.velocityX = targetSpeed;
                 }
             }
         } else {
             if (this.player.velocityX > 0) {
-                this.player.velocityX -= this.player.deceleration;
-                if (this.player.velocityX < 0) this.player.velocityX = 0;
+                this.player.velocityX = Math.max(0, this.player.velocityX - this.player.deceleration);
             } else if (this.player.velocityX < 0) {
-                this.player.velocityX += this.player.deceleration;
-                if (this.player.velocityX > 0) this.player.velocityX = 0;
+                this.player.velocityX = Math.min(0, this.player.velocityX + this.player.deceleration);
             }
         }
 
-        // 跳跃（空格键或上方向键）- 速度越快跳跃高度越高
-        // 支持二段跳：最多可跳2次，落地后重置
         const jumpKeyPressed = this.keys[' '] || this.keys['arrowup'];
         if (jumpKeyPressed && !this.jumpKeyHeld && this.player.jumpCount < this.player.maxJumpCount) {
             this.player.jumping = true;
             this.player.jumpCount++;
-            // 基础跳跃力 + 速度加成（速度越快跳得越高）
             const speedBonus = Math.abs(this.player.velocityX) * 0.3;
             this.player.velocityY = -(this.player.jumpForce + speedBonus);
         }
         this.jumpKeyHeld = jumpKeyPressed;
 
-        // 应用重力
         if (this.player.jumping || !this.player.onPlatform) {
             this.player.velocityY += this.player.gravity;
             this.player.y += this.player.velocityY;
 
-            // 检测是否落地
             if (this.player.y >= this.player.groundY) {
                 this.player.y = this.player.groundY;
                 this.player.jumping = false;
@@ -955,10 +878,7 @@ class GameNavigator {
             }
         }
 
-        // 应用水平速度
         this.player.x += this.player.velocityX;
-
-        // 边界检测
         this.player.x = Math.max(0, Math.min(this.player.x, maxX));
 
         this.updatePlayerPosition();
