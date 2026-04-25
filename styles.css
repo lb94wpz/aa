@@ -2,8 +2,6 @@
 :root {
     --sky-top: #5c94fc;
     --sky-bottom: #87ceeb;
-    --ground-color: #c84c09;
-    --ground-dark: #8b3000;
     --accent-color: #e94560;
     --text-color: #ffffff;
     --pixel-font: 'Press Start 2P', 'Courier New', monospace;
@@ -17,8 +15,6 @@
 body.night {
     --sky-top: #0d1b2a;
     --sky-bottom: #1b263b;
-    --ground-color: #5a2a04;
-    --ground-dark: #3a1a00;
     --cloud-color: #2a3a4a;
     --hill-color: #1a3a1a;
     --bush-color: #2a6a2a;
@@ -245,7 +241,7 @@ body {
     transition: background 2s ease;
 }
 
-/* 地面 - 砖块纹理 */
+/* 地面 - 使用图片纹理 */
 .bg-ground {
     position: absolute;
     bottom: 0;
@@ -254,32 +250,10 @@ body {
     height: 48px;
     z-index: 3;
     pointer-events: none;
-    background:
-        repeating-linear-gradient(
-            90deg,
-            var(--ground-color) 0px,
-            var(--ground-color) 30px,
-            var(--ground-dark) 30px,
-            var(--ground-dark) 32px
-        ),
-        repeating-linear-gradient(
-            0deg,
-            var(--ground-color) 0px,
-            var(--ground-color) 14px,
-            var(--ground-dark) 14px,
-            var(--ground-dark) 16px
-        );
-    background-blend-mode: normal;
-    border-top: 4px solid #e09050;
-}
-.bg-ground::before {
-    content: '';
-    position: absolute;
-    top: -20px;
-    left: 0;
-    right: 0;
-    height: 20px;
-    background: linear-gradient(180deg, transparent, rgba(200, 76, 9, 0.15));
+    background-image: url('1.png');
+    background-repeat: repeat-x;
+    background-position: bottom left;
+    background-size: auto 48px;
 }
 
 /* ========== 玩家角色 ========== */
